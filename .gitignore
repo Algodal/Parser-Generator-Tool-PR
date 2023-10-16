@@ -1,0 +1,85 @@
+####******* EXCLUDE **********#####
+
+# Python
+__pycache__/
+*.pyc
+
+# VSCODE
+.vscode/
+
+# General Folders
+bin/
+
+# Dump Files
+*.log
+*.sav
+*.dmp
+*.tmp
+*.bak
+
+# Compressed Files
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.zip
+
+# Libre Writer and Other Document forms
+*.odt
+*.doc
+*.rtf
+*.docx
+*.docm
+*.dotx
+*.dotm
+*.docb
+*.xlsx
+*.xlsm
+*.xltx
+*.xltm
+*.pdf
+*.tex
+*.wks
+*.wps
+*.wpd
+*.lex
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.x86_64
+*.apk
+
+# MANUAL
+doc/manual/_build/
+
+
+# CMAKE
+build/
+debug/
+release/
+
+# NODE
+node_modules/
+
+
+

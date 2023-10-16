@@ -1,0 +1,34 @@
+{
+  "name": "algodal-parser",
+  "displayName": "algodal-parser",
+  "description": "Algodal Parser Generator Language",
+  "version": "1.0.2",
+  "engines": {
+    "vscode": "^1.81.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "algodal-parser",
+      "aliases": ["Algodal Parser", "Algodal Parser Generator Language", "algodal-parser"],
+      "extensions": [".algodal-parser",".parser"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "algodal-parser",
+      "scopeName": "source.algodal-parser",
+      "path": "./syntaxes/algodal-parser.tmLanguage.json"
+    }]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Algodal/Public-Resources/tree/main/Projects/VSCode-Extensions/algodal-parser"
+  },
+  "publisher": "AlrickGrandison",
+  "icon": "images/cover.png",
+  "bugs": {
+    "url": "https://github.com/Algodal/Public-Resources/issues"
+  }
+}

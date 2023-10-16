@@ -1,0 +1,123 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Algodal Parser Generator Language",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#punctuations"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#iters"
+		},
+		{
+			"include": "#phases"
+		},
+		{
+			"include": "#actions"
+		},
+		{
+			"include": "#configs"
+		},
+		{
+			"include": "#commands"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#charlit"
+		},
+		{
+			"include": "#numbers"
+		},
+		{
+			"include": "#labels"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [{
+				"name": "comment.line.number-sign.algodal-parser",
+				"begin": "#",
+				"end": "\\n"
+			}]
+		},
+		"phases": {
+			"patterns": [{
+				"name": "emphasis.algodal-parser",
+				"match": "@\\b(token|syntax)\\b"
+			}]
+		},
+		"actions": {
+			"patterns": [{
+				"name": "keyword.control.algodal-parser",
+				"match": "@\\b(action)\\b"
+			}]
+		},
+		"configs": {
+			"patterns": [{
+				"name": "support.type.property-name.css.algodal-parser markup.italic.algodal-parser",
+				"match": "@\\b(config|tokenizer|objectpoint|entrypoint)\\b"
+			}]
+		},
+		"commands": {
+			"patterns": [{
+				"name": "keyword.algodal-parser",
+				"match": "@\\b(char|oneof|order|not|first|discard|reduce|previous|post_create|alias)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.algodal-parser",
+			"begin": "[$]?\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.algodal-parser",
+					"match": "\\\\."
+				}
+			]
+		},
+		"charlit": {
+			"name": "string.quoted.single.algodal-parser",
+			"begin": "'",
+			"end": "'"
+		},
+		"numbers": {
+			"patterns": [
+				{
+					"name": "constant.numeric.algodal-parser",
+					"match": "(0[xu][A-Fa-f0-9]+)|\\d+"
+				}
+			]
+		},
+		"iters": {
+			"patterns": [{
+				"name": "constant.numeric.algodal-parser",
+				"match": "[:+*?]"
+			}]
+		},
+		"operators": {
+			"patterns": [{
+				"name": "keyword.operator.algodal-parser",
+				"match": "[|]"
+			}]
+		},
+		"labels": {
+			"patterns": [{
+				"name": "strong.algodal-parser",
+				"match": "\\b(_*[a-zA-Z]\\w*)\\b"
+			}]
+		},
+		"punctuations": {
+			"patterns": [{
+				"match": "[,(){}\\[\\]<>]"
+			}]
+		}
+	},
+	"scopeName": "source.algodal-parser"
+}
