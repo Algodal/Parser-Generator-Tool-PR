@@ -2,7 +2,7 @@
   "name": "algodal-parser",
   "displayName": "algodal-parser",
   "description": "Algodal Parser Generator Language",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "engines": {
     "vscode": "^1.81.0"
   },
@@ -24,11 +24,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Algodal/Public-Resources/tree/main/Projects/VSCode-Extensions/algodal-parser"
+    "url": "https://github.com/Algodal/Parser-Generator-Tool-PR"
   },
   "publisher": "AlrickGrandison",
   "icon": "images/cover.png",
   "bugs": {
-    "url": "https://github.com/Algodal/Public-Resources/issues"
+    "url": "https://github.com/Algodal/Parser-Generator-Tool-PR/issues"
   }
 }

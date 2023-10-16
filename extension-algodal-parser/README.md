@@ -12,13 +12,13 @@ The Algodal™ Parser Generator Tool can generate a parser in the C programming 
 
 ## Report Bugs or Issues
 
-- Create a github issue at https://github.com/Algodal/Public-Resources/issues
+- Create a github issue at https://github.com/Algodal/Parser-Generator-Tool-PR/issues
 - Send an email to info@algodal.com
 
 
-## 2.0.0 (Upcoming Release)
+## 2.0.0 (Current Release)
 
-We are working on some exciting new features to the next iteration of the tool!
+Added priority, post_create, previous, range and improvements.
 
 ### 1.0.1 (Initial Release)
 

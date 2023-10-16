@@ -1,4 +1,4 @@
-# Algodal_ParserGenerator_Tool_PR
+# Algodal™ Parser Generator Tool PR
 Algodal Parser Generator Tool Public Resources
 
 ## License
