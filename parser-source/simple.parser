@@ -1,0 +1,24 @@
+@token:
+@action name <[+]@oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ">
+@action number <[+]@oneof "0123456789">
+
+@syntax:
+@action statement <name number>
+
+@config {
+    @tokenizer [
+        name,
+        number,
+        @discard " ",
+        @discard "\n",
+        @discard "\r\n"
+    ],
+    @entrypoint [
+        statement
+    ],
+    @objectpoint [
+        statement,
+        name,
+        number
+    ]
+}
