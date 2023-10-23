@@ -68,7 +68,7 @@
 		"commands": {
 			"patterns": [{
 				"name": "keyword.algodal-parser",
-				"match": "@\\b(char|oneof|order|not|first|discard|reduce|previous|post_create|alias)\\b"
+				"match": "@\\b(char|oneof|order|not|first|discard|reduce|previous|post_create|and|nullify)\\b"
 			}]
 		},
 		"strings": {
@@ -98,7 +98,7 @@
 		"iters": {
 			"patterns": [{
 				"name": "constant.numeric.algodal-parser",
-				"match": "[:+*?]"
+				"match": "[:+*?%]"
 			}]
 		},
 		"operators": {
