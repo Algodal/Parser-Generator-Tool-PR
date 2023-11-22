@@ -50,25 +50,25 @@
 		"phases": {
 			"patterns": [{
 				"name": "emphasis.algodal-parser",
-				"match": "@\\b(token|syntax)\\b"
+				"match": "@\\b([tT][oO][kK][eE][nN]|[sS][yY][nN][tT][aA][xX])\\b"
 			}]
 		},
 		"actions": {
 			"patterns": [{
 				"name": "keyword.control.algodal-parser",
-				"match": "@\\b(action)\\b"
+				"match": "@\\b([aA][cC][tT][iI][oO][nN])\\b"
 			}]
 		},
 		"configs": {
 			"patterns": [{
 				"name": "support.type.property-name.css.algodal-parser markup.italic.algodal-parser",
-				"match": "@\\b(config|tokenizer|objectpoint|entrypoint)\\b"
+				"match": "@\\b([cC][oO][nN][fF][iI][gG]|[tT][oO][kK][eE][nN][iI][zZ][eE][rR]|[oO][bB][jJ][eE][cC][tT][pP][oO][iI][nN][tT]|[eE][nN][tT][rR][yY][pP][oO][iI][nN][tT])\\b"
 			}]
 		},
 		"commands": {
 			"patterns": [{
 				"name": "keyword.algodal-parser",
-				"match": "@\\b(char|oneof|order|not|first|discard|reduce|previous|post_create|and|nullify)\\b"
+				"match": "@\\b([cC][hH][aA][rR]|[oO][nN][eE][oO][fF]|[oO][rR][dD][eE][rR]|[nN][oO][tT]|[fF][iI][rR][sS][tT]|[dD][iI][sS][cC][aA][rR][dD]|[rR][eE][dD][uU][cC][eE]|[pP][rR][eE][vV][iI][oO][uU][sS]|[pP][oO][sS][tT]_[cC][rR][eE][aA][tT][eE]|[aA][nN][dD]|[nN][uU][lL][lL][iI][fF][yY])\\b"
 			}]
 		},
 		"strings": {
