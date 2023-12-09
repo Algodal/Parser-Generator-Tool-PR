@@ -2278,7 +2278,7 @@ void AlgodalParser_GetNodeValue(const char* text, const struct AlgodalParser_Tok
 char* AlgodalParser_AllocNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node)
 {
     const unsigned int size = AlgodalParser_GetNodeValueSize(ast.tokens, node);
-    char* value = malloc(size + 1);
+    char* value = (char*)malloc(size + 1);
     memset(value, 0, size + 1);
     AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, size, value);
     return value;

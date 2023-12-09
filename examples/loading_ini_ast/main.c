@@ -19,7 +19,7 @@ static void LogNode(AlgodalParser_Ast ast, AlgodalParser_Node* node, const char*
 {
     const char* label = AlgodalParser_GetActionString_READONLY(ast.program, node->indexOfAction);
     unsigned int valuesize = AlgodalParser_GetNodeValueSize(ast.tokens, node);
-    char* parse = malloc(valuesize+1);
+    char* parse = (char*)malloc(valuesize+1);
     memset(parse, 0, valuesize);
     AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, valuesize, parse);
     printf("Logging Node:\nExpecting `%s` At Node of key:%s and value:(next line)\n```\n%s\n```\n", expect, label, parse);
