@@ -14,6 +14,7 @@ static int ExitParsing(long retv[], int retc)
     return EXIT_SUCCESS;
 }
 
+/// for debugging/logging (you can ignore this)
 static void LogNode(AlgodalParser_Ast ast, AlgodalParser_Node* node, const char* expect)
 {
     const char* label = AlgodalParser_GetActionString_READONLY(ast.program, node->indexOfAction);
@@ -25,13 +26,18 @@ static void LogNode(AlgodalParser_Ast ast, AlgodalParser_Node* node, const char*
     free(parse);
 }
 
+/// for debugging/logging (you can ignore this)
 static void LogNull(void* object, int line)
 {
     if(object==NULL)printf("The object is NULL at line %d\n", line);
 }
 
+/// for debugging/logging (you can ignore this)
 #define LOGNULL(OBJECT) LogNull(OBJECT, __LINE__)
 
+/// User specific - The values parsed by your parser will always be strings.  So if you need to convert them
+/// to a specific type, you can always write a function to do so.  The parser api also provides 
+/// a few utility functions to help with this.
 static int GetDeviceId(const char* device)
 {
     if(AlgodalParser_StrCmp(1, device, "Tablet")) return 1;
@@ -44,8 +50,8 @@ static int GetDeviceId(const char* device)
     return 0;
 }
 
-/// @brief This is your defined struct.  The data you parse you would to treat it
-///        any number of ways.  You would (if you want) create some arbitrary struct
+/// @brief User specific - The data you parse, you can treat it
+///        any number of ways.  You can (if you want) create some arbitrary struct
 ///        to store your parse data.  In this example, I am pulling the data LINEARLY.
 ///        You can structure your struct and name your members any how you like.
 ///        You don't even have to use a struct and interpret your data immediately after
@@ -89,14 +95,18 @@ struct MyData* ReadAst(
 
     // Normally you would start with  AlgodalParser_GetNodeByKeyOfRoots or AlgodalParser_GetNodeByValueOfRoots
     // since AlgodalParser_GetAnalyzeResult return's a list of root.  But since in this simple example
-    // we know we only have one instance of a root, we will selecting it from the array and start with
+    // we know we only have one instance of a root, we will be selecting it from the array and start with
     // AlgodalParser_GetNodeByKeyOfNode (or AlgodalParser_GetChildNodeByValueOfNode)
 
     /// Allocate space for MyData
     struct MyData* mydata = (struct MyData*)malloc(sizeof(struct MyData));
     memset(mydata, 0, sizeof(struct MyData));
 
-    AlgodalParser_Node* section; //< NOTE: How I decide to manipulate my ast (via section, heading and keyval) is also arbitrary and based on how my nodes are generated.  You can change both manipulation and analyzation based on your preference!
+	/// NOTE: How I decide to manipulate my ast (via section, heading and keyval) is also arbitrary and 
+	/// based on how my nodes are generated.  You can change both manipulation and analyzation based on 
+	/// your preference!
+	/// My ast in memory is as follows: list of sections; each section with a heading and list of setvalues (which I called keyval).
+    AlgodalParser_Node* section; 
     AlgodalParser_Node* heading;
     AlgodalParser_Node* keyval;
 
@@ -106,13 +116,15 @@ struct MyData* ReadAst(
     LOGNULL((void*)section); //For debugging 
 
     /// Once we have the first section,
-    /// we are going to loop through subsequent sections
+    /// we are going to loop through subsequent sections via siblings.
+    /// The way the Node is structured, each Node points its sibling to the right of it (from pov of parent).
+    /// If there is no sibling, it points to NULL.
     while(section)
     {
         printf("Log: read section\n");
         //LogNode(ast, section, "SECTION"); //Logging (Debug) purposes
 
-        heading = AlgodalParser_GetNodeByKeyOfNode(ast, 0, "heading", section);
+        heading = AlgodalParser_GetNodeByKeyOfNode(ast, 0, "heading", section); //< get the heading
         //LogNode(ast, heading, "HEADING"); //For debugging 
         LOGNULL(heading);  //For debugging 
 
@@ -122,6 +134,13 @@ struct MyData* ReadAst(
         /// pair.  So I get the first one here.  And since there will be a 
         /// list of keyval pairs as siblings, I can loop through the siblings.
         keyval = AlgodalParser_GetNodeByKeyOfNode(ast, 0, "setvalue", heading); 
+        
+        // Question:  why does keyval = AlgodalParser_GetNodeByKeyOfNode(ast, 0, "setvalue", heading);  returns the
+        // correct value even though setvalue is NOT a child of heading but a child of section
+        // that is because is a SIBLING of heading and AlgodalParser_GetNodeByKeyOfNode seaches through the 
+        // siblings first and then searches the children.  If you want to only search sibling or children only,
+        // you will use AlgodalParser_GetSiblingNodeByKeyOfNode or AlgodalParser_GetChildNodeByKeyOfNode respectively.
+ 
 
         /// AlgodalParser_IsNodeValueSubstring is used 
         /// instead of AlgodalParser_IsNodeValue because the value of 
@@ -160,7 +179,7 @@ struct MyData* ReadAst(
                 }
 
 
-                keyval = keyval->sibling; //the next setvalue under the heading
+                keyval = keyval->sibling; //set the next setvalue under the heading
             }
         }
 
@@ -201,7 +220,7 @@ struct MyData* ReadAst(
                 }
 
                 
-                keyval = keyval->sibling; //the next setvalue under the heading
+                keyval = keyval->sibling; //set the next setvalue under the heading
             }
         }
 
@@ -244,11 +263,11 @@ struct MyData* ReadAst(
                 }
 
                 
-                keyval = keyval->sibling; //the next setvalue under the heading
+                keyval = keyval->sibling; //set the next setvalue under the heading
             }
         }
 
-        section = section->sibling; //Set the next sibling section as the point of reference section.  This works because each section is a sibling to another and children of the root.  
+        section = section->sibling; //Set the next sibling section as the point of reference section.  This works because each section is a sibling to another.  
     }
 
     printf("Done manipulating AST\n");
@@ -326,6 +345,7 @@ int main(int argc, char *argv[])
             AlgodalParser_DestroyTokenizeResult(TokenizeResult);
             AlgodalParser_DestroyAnalyzeResult(AnalyzeResult);
             free(text);
+            //TODO: free MyData and allocated values
             long ret[] = {TokenizeResult.error.flags, AnalyzeResult.error.flags};
             return ExitParsing(ret, sizeof(ret)/sizeof(long));
         }
