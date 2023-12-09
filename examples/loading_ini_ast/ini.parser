@@ -1,0 +1,26 @@
+# https://en.wikipedia.org/wiki/INI_file
+# Only basic features implemented.  It would be very easy to implement advanced features.
+
+@token:
+@action alpha    <[+] @oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ">
+@action numeral <[+] @oneof $"0123456789">
+@action a_other  < @first numeral | [+] "_" | alpha>
+@action name     <[*] "_" alpha [*] a_other>
+
+@action comment  <(";" | "#") [*] @not "\n" "\n" >
+@action space    <[+] @oneof "\r\t ">
+
+@action value   <@previous "=" [*] @not @oneof "\n;#">
+
+@syntax:
+@action ini <[*] section>
+@action heading <"[" (@first name [?]("." name) | "." name) "]">
+@action section <heading [?]("\n" [*]setvalue)>
+@action setvalue <name "=" value [?] "\n">
+
+@config
+{
+	@tokenizer [@reduce "\n", name, "[", "]", @discard comment, @discard space, value 10, ".", "="],
+	@entrypoint [ini],
+	@objectpoint [ini, section, heading, setvalue, name, value]
+}

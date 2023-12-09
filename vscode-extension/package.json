@@ -2,7 +2,7 @@
   "name": "algodal-parser",
   "displayName": "algodal-parser",
   "description": "Algodal Parser Generator Language",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "engines": {
     "vscode": "^1.81.0"
   },
