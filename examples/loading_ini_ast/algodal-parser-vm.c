@@ -6,6 +6,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef ALGODAL_GENERATED_PARSER_VM_SHOW_ALL_NODES_VALUES
+#define SHOW_NODE_VALUE 1
+#else
+#define SHOW_NODE_VALUE node->terminal == 1
+#endif
 enum
 {
     ALGODAL_PARSING_DUP         =   2,
@@ -150,6 +155,10 @@ static inline char* strstrnc(char const *str1, char const *str2)
     return *p2 == 0 ? (char*)r : 0 ;
 }
 #endif 
+static inline int IsSpaceChar(int c)
+{
+    return c == '\n' || c == '\r' || c == '\t' || c == ' ';
+}
 #ifdef __cplusplus
 }
 #endif
@@ -170,8 +179,8 @@ AlgodalParser_Ast AlgodalParser_InitializeAst(
     AlgodalParser_Ast ast = {};
     ast.text = (char*)text;
     ast.linenumber = ln;
-    ast.tokens = tr.tokens.addr;
-    ast.roots = ar.nodes;
+    ast.tokens = tr.tokens;
+    ast.nodes = ar.nodes;
     ast.program = program;
     return ast;
 }
@@ -182,7 +191,7 @@ AlgodalParser_Node* AlgodalParser_GetNodeByValueOfRoots(
 )
 {
     AlgodalParser_Node root = {};
-    root.children = ast.roots;
+    root.children = ast.nodes;
     return AlgodalParser_GetNodeByValueOfNode(ast, icase, identifier, &root);
 }
 AlgodalParser_Node* AlgodalParser_GetNodeByKeyOfRoots(
@@ -192,7 +201,7 @@ AlgodalParser_Node* AlgodalParser_GetNodeByKeyOfRoots(
 )
 {
     AlgodalParser_Node root = {};
-    root.children = ast.roots;
+    root.children = ast.nodes;
     return AlgodalParser_GetNodeByKeyOfNode(ast, icase, identifier, &root);
 }
 AlgodalParser_Node* AlgodalParser_GetNodeByValueOfNode(
@@ -229,7 +238,7 @@ AlgodalParser_Node* AlgodalParser_GetChildNodeByValueOfNode(
     for(unsigned int i = 0; i < node->children.size; i++)
     {
         AlgodalParser_Node* child = node->children.addr[i];
-        long size = AlgodalParser_GetNodeValueSize(ast.tokens, child);
+        long size = AlgodalParser_GetNodeValueSize(ast, child);
         if(size == 0)
         {
             if(AlgodalParser_StrCmp(icase, identifier, ""))
@@ -245,7 +254,7 @@ AlgodalParser_Node* AlgodalParser_GetChildNodeByValueOfNode(
         {
             char value[size + 1];
             memset(value, 0, size + 1);
-            AlgodalParser_GetNodeValue(ast.text, ast.tokens, child, size, value);
+            AlgodalParser_GetNodeValue(ast, child, value);
             if(AlgodalParser_StrCmp(icase, identifier, value))
             {
                 return node;
@@ -298,7 +307,7 @@ AlgodalParser_Node* AlgodalParser_GetSiblingNodeByValueOfNode(
     while(node->sibling)
     {
         node = node->sibling;  
-        long size = AlgodalParser_GetNodeValueSize(ast.tokens, node);
+        long size = AlgodalParser_GetNodeValueSize(ast, node);
         if(size == 0)
         {
             if(AlgodalParser_StrCmp(icase, identifier, ""))
@@ -314,7 +323,7 @@ AlgodalParser_Node* AlgodalParser_GetSiblingNodeByValueOfNode(
         {
             char value[size + 1];
             memset(value, 0, size + 1);
-            AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, size, value);
+            AlgodalParser_GetNodeValue(ast, node, value);
             if(AlgodalParser_StrCmp(icase, identifier, value))
             {
                 return node;
@@ -356,13 +365,13 @@ int AlgodalParser_IsNodeValue(
     AlgodalParser_Node* node
 )
 {
-    long size = AlgodalParser_GetNodeValueSize(ast.tokens, node);
+    long size = AlgodalParser_GetNodeValueSize(ast, node);
     if(size == 0) return AlgodalParser_StrCmp(icase, identifier, "");
     else
     {
         char value[size + 1];
         memset(value, 0, size + 1);
-        AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, size, value);
+        AlgodalParser_GetNodeValue(ast, node, value);
         return AlgodalParser_StrCmp(icase, identifier, value);
     }     
 }
@@ -398,15 +407,70 @@ int AlgodalParser_IsNodeValueSubstring(
     AlgodalParser_Node* node
 )
 {
-    long size = AlgodalParser_GetNodeValueSize(ast.tokens, node);
+    long size = AlgodalParser_GetNodeValueSize(ast, node);
     if(size == 0) return AlgodalParser_StrCmp(icase, identifier, "");
     else
     {
         char value[size + 1];
         memset(value, 0, size + 1);
-        AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, size, value);
+        AlgodalParser_GetNodeValue(ast, node, value);
         return AlgodalParser_SubStrCmp(icase, value, identifier);
     }     
+}
+char* AlgodalParser_GetNodeKey(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, char *r_key)
+{
+    return strcpy(r_key, AlgodalParser_GetActionString_READONLY(ast.program, node->indexOfAction));
+}
+char* AlgodalParser_GetNodeValueBySize(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, char *r_value, unsigned int size)
+{
+    if(r_value)
+    {
+        long offsetStart = ast.tokens.addr[node->indexOfToken].index;
+        memcpy(r_value, &ast.text[offsetStart], size);
+    }
+    return r_value;
+}
+char* AlgodalParser_GetNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, char *r_value)
+{
+    return AlgodalParser_GetNodeValueBySize(ast, node, r_value, AlgodalParser_GetNodeValueSize(ast, node));
+}
+char* AlgodalParser_GetNodeValueSimplified(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, char *r_value)
+{
+    AlgodalParser_GetNodeValue(ast, node, r_value);
+    return AlgodalParser_SimplifyStr(strlen(r_value), r_value);
+}
+char* AlgodalParser_AllocNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node)
+{
+    const unsigned int size = AlgodalParser_GetNodeValueSize(ast, node);
+    char* value = (char*)malloc(size + 1);
+    memset(value, 0, size + 1);
+    AlgodalParser_GetNodeValue(ast, node, value);
+    return value;
+}
+long AlgodalParser_GetNodeValueSize(AlgodalParser_Ast ast, struct AlgodalParser_Node *node)
+{
+    long offsetStart = ast.tokens.addr[node->indexOfToken].index;
+    AlgodalParser_Token tokenEnd = ast.tokens.addr[node->indexOfToken + node->size - 1];
+    long offsetEnd   = tokenEnd.index + tokenEnd.size;
+    return offsetEnd - offsetStart;
+}
+char* AlgodalParser_GetTokenKey(AlgodalParser_Ast ast, AlgodalParser_Token token, char *r_key)
+{
+    return strcpy(r_key, AlgodalParser_GetTokenizerString_READONLY(ast.program, token.id));
+}
+char* AlgodalParser_GetTokenValue(AlgodalParser_Ast ast, struct AlgodalParser_Token token, char *r_value)
+{
+    if(token.size > 0)
+    {
+        memcpy(r_value, &ast.text[token.index], token.size);
+        r_value[token.size] = 0;
+    }
+    return r_value;
+}
+char* AlgodalParser_GetTokenValueSimplified(AlgodalParser_Ast ast, struct AlgodalParser_Token token, char *r_value)
+{
+    AlgodalParser_GetTokenValue(ast, token, r_value);
+    return AlgodalParser_SimplifyStr(strlen(r_value), r_value);
 }
 #ifdef __cplusplus
 }
@@ -454,17 +518,39 @@ char* AlgodalParser_UnquoteStr(const char* str, char* buf)
     buf[length] = 0;
     return buf;
 }
+char* AlgodalParser_SimplifyStr(size_t size, char* r_str)
+{
+    char bufferNew[size + 1];
+    memset(bufferNew, 0, size + 1);
+    unsigned int iNew = 0;
+    int flagSpace = 0;
+    for(unsigned int i = 0; i < size; i++)
+    {
+        int c = r_str[i];
+        if(IsSpaceChar(c))
+        {
+            if(flagSpace)
+            {
+                continue;
+            }
+            bufferNew[iNew++] = ' ';
+            flagSpace = 1;
+        }
+        else
+        {
+            flagSpace = 0;
+            bufferNew[iNew++] = c;
+        }
+    }
+    memcpy(r_str, bufferNew, size);
+    return r_str;
+}
 #ifdef __cplusplus
 }
 #endif
 #endif 
 #ifndef ALGODAL_GENERATED_PARSER_VM_C
 #define ALGODAL_GENERATED_PARSER_VM_C
-#ifdef ALGODAL_GENERATED_PARSER_VM_SHOW_ALL_NODES_VALUES
-#define SHOW_NODE_VALUE 1
-#else
-#define SHOW_NODE_VALUE node->terminal == 1
-#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -537,6 +623,17 @@ static size_t utf8_get_unicode_size (utf8_unicode_t unicode)
 #endif  
 #ifndef LINENUMBER_H
 #define LINENUMBER_H
+struct AlgodalParser_InternalLinenumber {
+    const char * buffer;
+    uint32_t lengthOfBuffer;
+    unsigned int pos;
+    struct {
+        unsigned int row;
+        unsigned int col;
+        uint8_t      bufferUpdates;
+    } metric;
+};
+typedef struct AlgodalParser_InternalLinenumber AlgodalParser_InternalLinenumber;
 static AlgodalParser_InternalLinenumber * Linenumber_create(const char * buffer, const uint32_t length);
 static void Linenumber_destroy(AlgodalParser_InternalLinenumber * pln);
 static void Linenumber_updateBuffer(AlgodalParser_InternalLinenumber * pln, const char* buffer, const uint32_t length);
@@ -600,23 +697,23 @@ inline static void append_line(struct AlgodalParser_Linenumber * AlgodalParser_P
 {
     const uint32_t index = AlgodalParser_ParserLinenumber->numberOfLines++;
     AlgodalParser_ParserLinenumber->lines = (struct AlgodalParser_ParserLine *)realloc(AlgodalParser_ParserLinenumber->lines, sizeof(struct AlgodalParser_ParserLine) * AlgodalParser_ParserLinenumber->numberOfLines);
-    AlgodalParser_ParserLinenumber->lines[index].offset = AlgodalParser_ParserLinenumber->linenumber->pos;
+    AlgodalParser_ParserLinenumber->lines[index].offset = ((AlgodalParser_InternalLinenumber*)AlgodalParser_ParserLinenumber->linenumber)->pos;
 }
-void UpdateParserLinenumberText(struct AlgodalParser_Linenumber * AlgodalParser_ParserLinenumber, const char* nulltermText, const uint32_t length)
+void UpdateParserLinenumberText(struct AlgodalParser_Linenumber * AlgodalParser_ParserLinenumber, const char* textDoc, const uint32_t length)
 {
-    Linenumber_updateBuffer(AlgodalParser_ParserLinenumber->linenumber, nulltermText, length);
-    while(AlgodalParser_ParserLinenumber->linenumber->pos < length)
+    Linenumber_updateBuffer(AlgodalParser_ParserLinenumber->linenumber, textDoc, length);
+    while(((AlgodalParser_InternalLinenumber*)AlgodalParser_ParserLinenumber->linenumber)->pos < length)
     {
         append_line(AlgodalParser_ParserLinenumber);
         Linenumber_nextLine(AlgodalParser_ParserLinenumber->linenumber, length);
     }
 }
-struct AlgodalParser_Linenumber *AlgodalParser_CreateParserLinenumber(const char* nulltermText, const uint32_t length)
+struct AlgodalParser_Linenumber *AlgodalParser_CreateParserLinenumber(const char* textDoc, const uint32_t length)
 {
     struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber = (struct AlgodalParser_Linenumber *)malloc(sizeof(struct AlgodalParser_Linenumber));
     memset(AlgodalParser_ParserLinenumber, 0, sizeof(struct AlgodalParser_Linenumber));
-    AlgodalParser_ParserLinenumber->linenumber = Linenumber_create(nulltermText, length);
-    UpdateParserLinenumberText(AlgodalParser_ParserLinenumber, nulltermText, length);
+    AlgodalParser_ParserLinenumber->linenumber = Linenumber_create(textDoc, length);
+    UpdateParserLinenumberText(AlgodalParser_ParserLinenumber, textDoc, length);
     return AlgodalParser_ParserLinenumber;
 }
 void AlgodalParser_DestroyParserLinenumber(struct AlgodalParser_Linenumber * AlgodalParser_ParserLinenumber)
@@ -649,9 +746,9 @@ inline static void getlinenumber(struct AlgodalParser_Linenumber * AlgodalParser
         *colPtr  = 1 + (offset - AlgodalParser_ParserLinenumber->lines[AlgodalParser_ParserLinenumber->numberOfLines - 1].offset); 
     }
 }
-const char* GetLn(struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber, uint32_t offset, char *buffer)
+const char* AlgodalParser_GetLinenumber(struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber, uint32_t offset, char *buffer)
 {
-    if(AlgodalParser_ParserLinenumber && AlgodalParser_ParserLinenumber->linenumber && AlgodalParser_ParserLinenumber->linenumber->metric.bufferUpdates)
+    if(AlgodalParser_ParserLinenumber && AlgodalParser_ParserLinenumber->linenumber && ((AlgodalParser_InternalLinenumber*)AlgodalParser_ParserLinenumber->linenumber)->metric.bufferUpdates)
     {
         uint32_t line = 1, col = 1;
         getlinenumber(AlgodalParser_ParserLinenumber, offset, &line, &col);
@@ -663,9 +760,9 @@ const char* GetLn(struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumbe
     }
     return buffer;
 }
-void GetLnInt(struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber, uint32_t offset, uint32_t *pl, uint32_t *pc)
+void AlgodalParser_GetLinenumberInteger(struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber, uint32_t offset, uint32_t *pl, uint32_t *pc)
 {
-    if(AlgodalParser_ParserLinenumber && AlgodalParser_ParserLinenumber->linenumber && AlgodalParser_ParserLinenumber->linenumber->metric.bufferUpdates)
+    if(AlgodalParser_ParserLinenumber && AlgodalParser_ParserLinenumber->linenumber && ((AlgodalParser_InternalLinenumber*)AlgodalParser_ParserLinenumber->linenumber)->metric.bufferUpdates)
     {
         uint32_t line = 1, col = 1;
         getlinenumber(AlgodalParser_ParserLinenumber, offset, &line, &col);
@@ -674,18 +771,6 @@ void GetLnInt(struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber, u
     }
 }
 #endif  
-#ifndef SET_PARSER_SETTING  
-#define SET_PARSER_SETTING
-#define PARSER_STDERR stderr
-#define PARSER_STDOUT stdout
-#else
-#ifndef PARSER_STDERR
-#define PARSER_STDERR stderr
-#endif 
-#ifndef PARSER_STDOUT
-#define PARSER_STDOUT stdout
-#endif 
-#endif 
 struct ParserInput
 {
     uint16_t       ID;
@@ -735,46 +820,6 @@ struct AnalyzeExtra
 struct TokenizeExtra
 {
 };
-static void PrintTokenizeParserError(struct AlgodalParser_Program Program, struct AlgodalParser_Error error, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
-{
-    (void)Program;
-    char lineBuffer1[64], lineBuffer2[64];
-    if(error.flags & ALGODAL_PARSING_FAIL)
-    {
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: failed to tokenize text at %s - %s\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2));
-    }
-    if(error.flags & ALGODAL_PARSING_DUP)
-    {
-        char * tok1 = Program.Strings[Program.Actions[Program.Tokenizers[error.user.value].indexOfAction].indexOfString].text;
-        char * tok2 = Program.Strings[Program.Actions[Program.Tokenizers[error.user.extravalue].indexOfAction].indexOfString].text;
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: multiple non-discarded tokenizers returned equal tokens at %s - %s: `%s`, `%s`\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2), tok1, tok2);
-    }
-    if(error.flags & ALGODAL_PARSING_ERROR)
-    {
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: undefined tokenization error occurred at %s - %s\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2));
-    }
-}
-static void PrintAnalyzeParserError(struct AlgodalParser_Program Program, struct AlgodalParser_Error error, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
-{
-    (void)Program;
-    char lineBuffer1[64], lineBuffer2[64];
-    if(error.flags & ALGODAL_PARSING_FAIL)
-    {
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: failed to analyze tokens at %s - %s\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2));
-    }
-    if(error.flags & ALGODAL_PARSING_DUP)
-    {
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: multiple analyzers returned equal nodes at %s - %s\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2));
-    }
-    if(error.flags & ALGODAL_PARSING_EOI)
-    {
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: not all tokens were parsed at %s - %s\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2));
-    }
-    if(error.flags & ALGODAL_PARSING_ERROR)
-    {
-        cwpc_fprintf(PARSER_STDERR, "\033[31;1m%s: undefined analyzation error occurred at %s - %s\033[0m\n", Program.NameOfParser, GetLn(AlgodalParser_ParserLinenumber, error.index, lineBuffer1), GetLn(AlgodalParser_ParserLinenumber, error.index2, lineBuffer2));
-    }
-}
 inline static int CharsAvailable(struct ParserInput Input)
 {
     return Input.IndexOfChars < Input.SizeOfChars;
@@ -1527,8 +1572,8 @@ static void TokenizeResultAddOutput(struct AlgodalParser_Program Program, struct
         ptr->error.flags = output.Flags;
         ptr->error.index = offset;
         ptr->error.index2 = clamp_index(ptr->error.index + output.Size, size);
-        ptr->error.user.value = output.value_current;
-        ptr->error.user.extravalue = output.value_duplicated;
+        ptr->error.eval1 = output.value_current;
+        ptr->error.eval2 = output.value_duplicated;
         return;
     }
     struct AlgodalParser_Token token = TokenFromOutput(output);
@@ -1574,23 +1619,7 @@ const char * AlgodalParser_GetTokenizerString_READONLY(struct AlgodalParser_Prog
 {
     return program.Strings[program.Actions[program.Tokenizers[id].indexOfAction].indexOfString].text;
 }
-void AlgodalParser_GetTokenKey(struct AlgodalParser_Program program, struct AlgodalParser_Token token, unsigned int size, char *r_key)
-{
-    if(size) strncpy(r_key, AlgodalParser_GetTokenizerString_READONLY(program, token.id), size);
-    else strcpy(r_key, AlgodalParser_GetTokenizerString_READONLY(program, token.id));
-}
-void AlgodalParser_GetTokenValue(const char* text, struct AlgodalParser_Token token, char *r_value)
-{
-    if(token.size > 0)
-    {
-        memcpy(r_value, &text[token.index], token.size);
-        for(uint32_t i = 0; i < token.size; i++)
-        {
-            if(r_value[i] == '\n') r_value[i] = '\t';
-        }
-    }
-}
-static char * HorizontSpaceString(char * string)
+/*static char * HorizontSpaceString(char * string)
 {
     unsigned int i = 0;
     while(string[i] != 0) 
@@ -1601,34 +1630,7 @@ static char * HorizontSpaceString(char * string)
         i++;
     }
     return string;
-}
-static void PrintToken(struct AlgodalParser_Program program, const char* text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber, struct AlgodalParser_Token token)
-{
-    char lineBuffer[512] = {};
-    cwpc_fprintf(PARSER_STDOUT, "%s ", GetLn(AlgodalParser_ParserLinenumber, token.index, lineBuffer));
-    char key[1024] = {};
-    const char * readonlykey = AlgodalParser_GetTokenizerString_READONLY(program, token.id);
-    memcpy(key, readonlykey, strlen(readonlykey));
-    cwpc_fprintf(PARSER_STDOUT, "%s ", HorizontSpaceString(key));
-    if(program.Tokenizers[token.id].flag != 3 && program.Tokenizers[token.id].type != 0 && token.size > 0)
-    {
-        cwpc_fprintf(PARSER_STDOUT, ": ");
-        char value[token.size + 1];
-        memset(value, 0, token.size + 1);
-        AlgodalParser_GetTokenValue(text, token, value);
-        cwpc_fprintf(PARSER_STDOUT, "%s", HorizontSpaceString(value));
-    }
-    cwpc_fprintf(PARSER_STDOUT, "\n");
-}
-void AlgodalParser_PrintTokenizeResult(struct AlgodalParser_Program program, struct AlgodalParser_TokenizeResult TokenizeResult, const char* text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
-{
-    for(uint32_t i = 0; i < TokenizeResult.tokens.size; i++)
-    {
-        struct AlgodalParser_Token token = TokenizeResult.tokens.addr[i];
-        PrintToken(program, text, AlgodalParser_ParserLinenumber, token);
-    }
-    PrintTokenizeParserError(program, TokenizeResult.error, AlgodalParser_ParserLinenumber);
-}
+}*/
 inline static int8_t GetObjectpointPriority(struct AlgodalParser_Program Program, uint16_t indexOfAction)
 {
     for(uint16_t i = 0; i < Program.CountOfObjectpoints; i++)
@@ -2192,8 +2194,8 @@ static void AnalyzeResultAdd(struct AlgodalParser_Program Program, struct Algoda
         ptr->error.flags = output.Flags;
         ptr->error.index = tokens[index].index;
         ptr->error.index2 = tokens[clamp_index(index2, size)].index;
-        ptr->error.user.value = output.value_current;
-        ptr->error.user.extravalue = output.value_duplicated;
+        ptr->error.eval1 = output.value_current;
+        ptr->error.eval2 = output.value_duplicated;
     }
 }
 struct AlgodalParser_AnalyzeResult AlgodalParser_GetAnalyzeResult(struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Token *tokens, const uint32_t size, struct AlgodalParser_OtherAnalyzeParams* oparams)
@@ -2225,108 +2227,125 @@ struct AlgodalParser_AnalyzeResult AlgodalParser_GetAnalyzeResult(struct Algodal
     }
     return AlgodalParser_AnalyzeResult;
 }
-static void printIndent(uint32_t indent)
+static void PrintIndent(uint32_t indent)
 {
-    for(uint32_t i = 0; i < indent; i++) cwpc_fprintf(PARSER_STDOUT, "\t");
+    for(uint32_t i = 0; i < indent; i++) cwpc_fprintf(ALGODALPARSER_STDOUT, "\t");
 }
 const char *AlgodalParser_GetActionString_READONLY(struct AlgodalParser_Program program, unsigned int id)
 {
     return program.Strings[program.Actions[id].indexOfString].text;
 }
-void AlgodalParser_GetNodeKey(struct AlgodalParser_Program program, struct AlgodalParser_Node *node, char *r_key)
-{
-    strcpy(r_key, AlgodalParser_GetActionString_READONLY(program, node->indexOfAction));
-}
-static inline int IsSpaceChar(int c)
-{
-    return c == '\n' || c == '\r' || c == '\t' || c == ' ';
-}
-static inline void SimplifyNodeValue(char* buffer, size_t size)
-{
-    char bufferNew[size + 1];
-    memset(bufferNew, 0, size + 1);
-    unsigned int iNew = 0;
-    int flagSpace = 0;
-    for(unsigned int i = 0; i < size; i++)
-    {
-        int c = buffer[i];
-        if(IsSpaceChar(c))
-        {
-            if(flagSpace)
-            {
-                continue;
-            }
-            bufferNew[iNew++] = ' ';
-            flagSpace = 1;
-        }
-        else
-        {
-            flagSpace = 0;
-            bufferNew[iNew++] = c;
-        }
-    }
-    memcpy(buffer, bufferNew, size);
-}
-void AlgodalParser_GetNodeValue(const char* text, const struct AlgodalParser_Token tokens[], struct AlgodalParser_Node *node, unsigned int size, char *r_value)
-{
-    if(r_value)
-    {
-        long offsetStart = tokens[node->indexOfToken].index;
-        memcpy(r_value, &text[offsetStart], size);
-    }
-}
-char* AlgodalParser_AllocNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node)
-{
-    const unsigned int size = AlgodalParser_GetNodeValueSize(ast.tokens, node);
-    char* value = (char*)malloc(size + 1);
-    memset(value, 0, size + 1);
-    AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, size, value);
-    return value;
-}
-void PrintNode(struct AlgodalParser_Program program, struct AlgodalParser_Node *node, const struct AlgodalParser_Token tokens[], const char* text, uint16_t indent, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
+void AlgodalParser_PrintNode(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, uint16_t indent)
 {
     if(node->invisible)
     {
         for(uint32_t i = 0; i < node->children.size; i++)
         {
-            PrintNode(program, node->children.addr[i], tokens, text, indent, AlgodalParser_ParserLinenumber);
+            AlgodalParser_PrintNode(ast, node->children.addr[i], indent);
         }
     }
     else
     {
-        printIndent(indent);
+        PrintIndent(indent);
         char lineBuffer[512];
-        cwpc_fprintf(PARSER_STDOUT, "%s ", GetLn(AlgodalParser_ParserLinenumber, tokens[node->indexOfToken].index, lineBuffer));
-        char key[tokens[node->indexOfToken].size + 1];
-        key[tokens[node->indexOfToken].size] = 0;
-        AlgodalParser_GetNodeKey(program, node, key);
-        cwpc_fprintf(PARSER_STDOUT, "%s ", key);
+        cwpc_fprintf(ALGODALPARSER_STDOUT, "%s ", AlgodalParser_GetLinenumber(ast.linenumber, ast.tokens.addr[node->indexOfToken].index, lineBuffer));
+        char key[ast.tokens.addr[node->indexOfToken].size + 1];
+        key[ast.tokens.addr[node->indexOfToken].size] = 0;
+        AlgodalParser_GetNodeKey(ast, node, key);
+        cwpc_fprintf(ALGODALPARSER_STDOUT, "%s ", key);
         const int showNodeValue = SHOW_NODE_VALUE;
-        if(GetObjectpointFlag(program, node->indexOfAction) == 0 && showNodeValue)
+        if(GetObjectpointFlag(ast.program, node->indexOfAction) == 0 && showNodeValue)
         {
-            cwpc_fprintf(PARSER_STDOUT, ": ");
-            unsigned int size = AlgodalParser_GetNodeValueSize(tokens, node);
+            cwpc_fprintf(ALGODALPARSER_STDOUT, ": ");
+            unsigned int size = AlgodalParser_GetNodeValueSize(ast, node);
             char value[size + 1];
             memset(value, 0, size + 1);
-            AlgodalParser_GetNodeValue(text, tokens, node, size, value);
-            SimplifyNodeValue(value, size);
-            cwpc_fprintf(PARSER_STDOUT, "%s", HorizontSpaceString(value));
+            AlgodalParser_GetNodeValue(ast, node, value);
+            AlgodalParser_SimplifyStr(size, value);
+            cwpc_fprintf(ALGODALPARSER_STDOUT, "%s", value);
         }
-        cwpc_fprintf(PARSER_STDOUT, "\n");
+        cwpc_fprintf(ALGODALPARSER_STDOUT, "\n");
         for(uint32_t i = 0; i < node->children.size; i++)
         {
-            PrintNode(program, node->children.addr[i], tokens, text, indent + 1, AlgodalParser_ParserLinenumber);
+            AlgodalParser_PrintNode(ast, node->children.addr[i], indent + 1);
         }
     }
 }
-void AlgodalParser_PrintAnalyzeResult(struct AlgodalParser_Program program, struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult, struct AlgodalParser_Token tokens[], const char* text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
+void AlgodalParser_PrintAnalyzeResult(AlgodalParser_Ast ast, AlgodalParser_Error error)
 {
-    for(uint32_t i = 0; i < AlgodalParser_AnalyzeResult.nodes.size; i++)
+    for(uint32_t i = 0; i < ast.nodes.size; i++)
     {
-        struct AlgodalParser_Node *node = AlgodalParser_AnalyzeResult.nodes.addr[i];
-        PrintNode(program, node, tokens, text, 0, AlgodalParser_ParserLinenumber);
+        struct AlgodalParser_Node *node = ast.nodes.addr[i];
+        AlgodalParser_PrintNode(ast, node, 0);
     }
-    PrintAnalyzeParserError(program, AlgodalParser_AnalyzeResult.error, AlgodalParser_ParserLinenumber);
+    AlgodalParser_PrintAnalyzeParserError(ast, error);
+}
+void AlgodalParser_PrintTokenizeParserError(AlgodalParser_Ast ast, struct AlgodalParser_Error error)
+{
+    char lineBuffer1[64], lineBuffer2[64];
+    if(error.flags & ALGODAL_PARSING_FAIL)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: failed to tokenize text at %s - %s\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2));
+    }
+    if(error.flags & ALGODAL_PARSING_DUP)
+    {
+        char * tok1 = ast.program.Strings[ast.program.Actions[ast.program.Tokenizers[error.eval1].indexOfAction].indexOfString].text;
+        char * tok2 = ast.program.Strings[ast.program.Actions[ast.program.Tokenizers[error.eval2].indexOfAction].indexOfString].text;
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: multiple non-discarded tokenizers returned equal tokens at %s - %s: `%s`, `%s`\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2), tok1, tok2);
+    }
+    if(error.flags & ALGODAL_PARSING_ERROR)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: undefined tokenization error occurred at %s - %s\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2));
+    }
+}
+void AlgodalParser_PrintAnalyzeParserError(AlgodalParser_Ast ast, AlgodalParser_Error error)
+{
+    char lineBuffer1[64], lineBuffer2[64];
+    if(error.flags & ALGODAL_PARSING_FAIL)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: failed to analyze tokens at %s - %s\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2));
+    }
+    if(error.flags & ALGODAL_PARSING_DUP)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: multiple analyzers returned equal nodes at %s - %s\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2));
+    }
+    if(error.flags & ALGODAL_PARSING_EOI)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: not all tokens were parsed at %s - %s\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2));
+    }
+    if(error.flags & ALGODAL_PARSING_ERROR)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDERR, "\033[31;1m%s: undefined analyzation error occurred at %s - %s\033[0m\n", ast.program.NameOfParser, AlgodalParser_GetLinenumber(ast.linenumber, error.index, lineBuffer1), AlgodalParser_GetLinenumber(ast.linenumber, error.index2, lineBuffer2));
+    }
+}
+void AlgodalParser_PrintToken(AlgodalParser_Ast ast, AlgodalParser_Token token)
+{
+    char lineBuffer[512] = {};
+    cwpc_fprintf(ALGODALPARSER_STDOUT, "%s ", AlgodalParser_GetLinenumber(ast.linenumber, token.index, lineBuffer));
+    char key[1024] = {};
+    const char * readonlykey = AlgodalParser_GetTokenizerString_READONLY(ast.program, token.id);
+    memcpy(key, readonlykey, strlen(readonlykey));
+    AlgodalParser_SimplifyStr(strlen(key), key);
+    cwpc_fprintf(ALGODALPARSER_STDOUT, "%s ", key);
+    if(ast.program.Tokenizers[token.id].flag != 3 && ast.program.Tokenizers[token.id].type != 0 && token.size > 0)
+    {
+        cwpc_fprintf(ALGODALPARSER_STDOUT, ": ");
+        char value[token.size + 1];
+        memset(value, 0, token.size + 1);
+        AlgodalParser_GetTokenValue(ast, token, value);
+        AlgodalParser_SimplifyStr(token.size, value);
+        cwpc_fprintf(ALGODALPARSER_STDOUT, "%s", value);
+    }
+    cwpc_fprintf(ALGODALPARSER_STDOUT, "\n");
+}
+void AlgodalParser_PrintTokenizeResult(AlgodalParser_Ast ast, AlgodalParser_Error error)
+{
+    for(uint32_t i = 0; i < ast.tokens.size; i++)
+    {
+        struct AlgodalParser_Token token = ast.tokens.addr[i];
+        AlgodalParser_PrintToken(ast, token);
+    }
+    AlgodalParser_PrintTokenizeParserError(ast, error);
 }
 void AlgodalParser_DestroyTokenizeResult(struct AlgodalParser_TokenizeResult TokenizeResult) 
 {
@@ -2338,74 +2357,67 @@ void AlgodalParser_DestroyAnalyzeResult(struct AlgodalParser_AnalyzeResult Algod
         DestroyNode(&AlgodalParser_AnalyzeResult.nodes.addr[i]);
     free(AlgodalParser_AnalyzeResult.nodes.addr);
 }
-long AlgodalParser_GetNodeValueSize(const struct AlgodalParser_Token tokens[], struct AlgodalParser_Node *node)
-{
-    long offsetStart = tokens[node->indexOfToken].index;
-    AlgodalParser_Token tokenEnd = tokens[node->indexOfToken + node->size - 1];
-    long offsetEnd   = tokenEnd.index + tokenEnd.size;
-    return offsetEnd - offsetStart;
-}
-struct AlgodalParser_TokenPair ExportToken(struct AlgodalParser_Token token, struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
+struct AlgodalParser_TokenPair AlgodalParser_ExportToken(AlgodalParser_Ast ast, AlgodalParser_Token token)
 {
     struct AlgodalParser_TokenPair pair = {};
     pair.offsetOfText = token.index;
-    pair.key = strdup(Program.Strings[Program.Actions[Program.Tokenizers[token.id].indexOfAction].indexOfString].text);
-    if(Program.Tokenizers[token.id].type != 3 && token.size > 0)
+    pair.key = strdup(ast.program.Strings[ast.program.Actions[ast.program.Tokenizers[token.id].indexOfAction].indexOfString].text);
+    if(ast.program.Tokenizers[token.id].type != 3 && token.size > 0)
     {
         char buf[token.size + 1]; buf[token.size] = 0;
-        memcpy(buf, &text[token.index], token.size);
+        memcpy(buf, &ast.text[token.index], token.size);
         pair.value = strdup(buf);
     }
-    GetLnInt(AlgodalParser_ParserLinenumber, token.index, &pair.lineNumber, &pair.columnNumber);
+    AlgodalParser_GetLinenumberInteger(ast.linenumber, token.index, &pair.lineNumber, &pair.columnNumber);
     return pair;
 }
-struct AlgodalParser_TokenPairList AlgodalParser_ExportTokenizeResult(struct AlgodalParser_TokenizeResult TokenizeResult, struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
+struct AlgodalParser_TokenPairList AlgodalParser_ExportTokenizeResult(AlgodalParser_Ast ast)
 {
     struct AlgodalParser_TokenPairList pairList = {};
-    pairList.size = TokenizeResult.tokens.size;
+    pairList.size = ast.tokens.size;
     pairList.addr = (struct AlgodalParser_TokenPair *)malloc(sizeof(struct AlgodalParser_TokenPair) * pairList.size);
     memset(pairList.addr, 0, sizeof(struct AlgodalParser_TokenPair) * pairList.size);
     for(uint32_t i = 0; i < pairList.size; i++)
     {
-        pairList.addr[i] = ExportToken(TokenizeResult.tokens.addr[i], Program, text, AlgodalParser_ParserLinenumber);
+        pairList.addr[i] = AlgodalParser_ExportToken(ast, ast.tokens.addr[i]);
     }
     return pairList;
 }
-static struct AlgodalParser_NodePair ExportNode(struct AlgodalParser_Token *tokens, struct AlgodalParser_Node *node, struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
+AlgodalParser_NodePair AlgodalParser_ExportNode(AlgodalParser_Ast ast, struct AlgodalParser_Node *node)
 {
     struct AlgodalParser_NodePair pair = {};
-    pair.offsetOfText = tokens[node->indexOfToken].index;
-    pair.key = strdup(Program.Strings[Program.Actions[node->indexOfAction].indexOfString].text);
-    GetLnInt(AlgodalParser_ParserLinenumber, tokens[node->indexOfToken].index, &pair.lineNumber, &pair.columnNumber);
+    pair.offsetOfText = ast.tokens.addr[node->indexOfToken].index;
+    pair.key = strdup(ast.program.Strings[ast.program.Actions[node->indexOfAction].indexOfString].text);
+    AlgodalParser_GetLinenumberInteger(ast.linenumber, ast.tokens.addr[node->indexOfToken].index, &pair.lineNumber, &pair.columnNumber);
     const int showNodeValue = SHOW_NODE_VALUE;
     if(showNodeValue)
     {
-        uint32_t length = tokens[node->indexOfToken + node->size - 1].index - tokens[node->indexOfToken].index + tokens[node->indexOfToken + node->size - 1].size;
+        uint32_t length = ast.tokens.addr[node->indexOfToken + node->size - 1].index - ast.tokens.addr[node->indexOfToken].index + ast.tokens.addr[node->indexOfToken + node->size - 1].size;
         char buf[length + 1]; buf[length] = 0;
-        memcpy(buf, &text[tokens[node->indexOfToken].index], length);
+        memcpy(buf, &ast.text[ast.tokens.addr[node->indexOfToken].index], length);
         pair.value = strdup(buf);
     }
     pair.children.size = node->children.size;
     pair.children.addr = (struct AlgodalParser_NodePair *)malloc(sizeof(struct AlgodalParser_NodePair) * pair.children.size);
     for(uint32_t i = 0; i < pair.children.size; i++)
     {
-        pair.children.addr[i] = ExportNode(tokens, node->children.addr[i], Program, text, AlgodalParser_ParserLinenumber);
+        pair.children.addr[i] = AlgodalParser_ExportNode(ast, node->children.addr[i]);
     }
     return pair;
 }
-struct AlgodalParser_NodePairList AlgodalParser_ExportAnalyzeResult(struct AlgodalParser_Token *tokens, struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult, struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber)
+struct AlgodalParser_NodePairList AlgodalParser_ExportAnalyzeResult(AlgodalParser_Ast ast)
 {
     struct AlgodalParser_NodePairList pairList = {};
-    pairList.size = AlgodalParser_AnalyzeResult.nodes.size;
+    pairList.size = ast.nodes.size;
     pairList.addr = (struct AlgodalParser_NodePair *)malloc(sizeof(struct AlgodalParser_NodePair) * pairList.size);
     memset(pairList.addr, 0, sizeof(struct AlgodalParser_NodePair) * pairList.size);
     for(uint32_t i = 0; i < pairList.size; i++)
     {
-        pairList.addr[i] = ExportNode(tokens, AlgodalParser_AnalyzeResult.nodes.addr[i], Program, text, AlgodalParser_ParserLinenumber);
+        pairList.addr[i] = AlgodalParser_ExportNode(ast, ast.nodes.addr[i]);
     }
     return pairList;
 }
-void DestroyTokenPair(struct AlgodalParser_TokenPair pair)
+void AlgodalParser_DestroyTokenPair(struct AlgodalParser_TokenPair pair)
 {
     free((void*)pair.key);
     if(pair.value)free((void*)pair.value);
@@ -2414,17 +2426,17 @@ void AlgodalParser_DestroyTokenPairList(struct AlgodalParser_TokenPairList pairL
 {
     for(uint32_t i = 0; i < pairList.size; i++)
     {
-        DestroyTokenPair(pairList.addr[i]);
+        AlgodalParser_DestroyTokenPair(pairList.addr[i]);
     }
     free(pairList.addr);
 }
-void DestroyNodePair(struct AlgodalParser_NodePair pair)
+void AlgodalParser_DestroyNodePair(struct AlgodalParser_NodePair pair)
 {
     free((void*)pair.key);
     free((void*)pair.value);
     for(uint32_t i = 0; i < pair.children.size; i++)
     {
-        DestroyNodePair(pair.children.addr[i]);
+        AlgodalParser_DestroyNodePair(pair.children.addr[i]);
     }
     free(pair.children.addr);
 }
@@ -2432,7 +2444,7 @@ void AlgodalParser_DestroyNodePairList(struct AlgodalParser_NodePairList pairLis
 {
     for(uint32_t i = 0; i < pairList.size; i++)
     {
-        DestroyNodePair(pairList.addr[i]);
+        AlgodalParser_DestroyNodePair(pairList.addr[i]);
     }
     free(pairList.addr);
 }

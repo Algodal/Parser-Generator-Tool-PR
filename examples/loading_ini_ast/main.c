@@ -18,10 +18,10 @@ static int ExitParsing(long retv[], int retc)
 static void LogNode(AlgodalParser_Ast ast, AlgodalParser_Node* node, const char* expect)
 {
     const char* label = AlgodalParser_GetActionString_READONLY(ast.program, node->indexOfAction);
-    unsigned int valuesize = AlgodalParser_GetNodeValueSize(ast.tokens, node);
+    unsigned int valuesize = AlgodalParser_GetNodeValueSize(ast, node);
     char* parse = (char*)malloc(valuesize+1);
     memset(parse, 0, valuesize);
-    AlgodalParser_GetNodeValue(ast.text, ast.tokens, node, valuesize, parse);
+    AlgodalParser_GetNodeValue(ast, node, parse);
     printf("Logging Node:\nExpecting `%s` At Node of key:%s and value:(next line)\n```\n%s\n```\n", expect, label, parse);
     free(parse);
 }
@@ -293,26 +293,30 @@ int main(int argc, char *argv[])
             fread(text, 1, length, fp);
             fclose(fp);
             
+            AlgodalParser_TokenizeResult tr = {};
+            AlgodalParser_AnalyzeResult ar = {};
+            AlgodalParser_Linenumber *ln = 0;
             
             clock_t begin = clock(), end;
             double duration;
             
-            AlgodalParser_TokenizeResult TokenizeResult = AlgodalParser_GetTokenizeResult(configProgram, text, length, 0);
-            AlgodalParser_AnalyzeResult AnalyzeResult = AlgodalParser_GetAnalyzeResult(configProgram, text, TokenizeResult.tokens.addr, TokenizeResult.tokens.size, 0);
+            tr = AlgodalParser_GetTokenizeResult(configProgram, text, length, 0);
+            ar = AlgodalParser_GetAnalyzeResult(configProgram, text, tr.tokens.addr, tr.tokens.size, 0);
             end = clock();
-            duration = (double)(end - begin) / CLOCKS_PER_SEC;
+            duration = (double)(end - begin) / CLOCKS_PER_SEC;        
             
+            ln = AlgodalParser_CreateParserLinenumber(text, length);
+            AlgodalParser_Ast ast = ALGODALPARSER_INITIALIZEAST(configProgram);
             
-            AlgodalParser_Linenumber *PLn = AlgodalParser_CreateParserLinenumber(text, length);
             cwpc_printf("\nTokenization:\n");
-            AlgodalParser_PrintTokenizeResult(configProgram, TokenizeResult, text, PLn);
+            AlgodalParser_PrintTokenizeResult(ast, tr.error);
             
             if((configProgram).CountOfEntrypoints)
 			{
-				if(TokenizeResult.error.flags == 0)
+				if(tr.error.flags == 0)
 		        {
 		            cwpc_printf("\nAnalyzation:\n");
-		            AlgodalParser_PrintAnalyzeResult(configProgram, AnalyzeResult, TokenizeResult.tokens.addr, text, PLn);
+		            AlgodalParser_PrintAnalyzeResult(ast, ar.error);
 		        }
 		        else
 		        {
@@ -321,11 +325,11 @@ int main(int argc, char *argv[])
 			}
 
             struct MyData* data = ReadAst(
-                TokenizeResult, 
-                AnalyzeResult,
+                tr, 
+                ar,
                 configProgram,
                 text,
-                PLn
+                ln
             );
 
             printf("\n\n--------- OUTPUT ---------\n\n");
@@ -341,12 +345,12 @@ int main(int argc, char *argv[])
                 data->system_time.minute, data->system_time.period);
 
             cwpc_printf("completed in %f milliseconds\n", duration * 1000);
-            AlgodalParser_DestroyParserLinenumber(PLn);
-            AlgodalParser_DestroyTokenizeResult(TokenizeResult);
-            AlgodalParser_DestroyAnalyzeResult(AnalyzeResult);
+            AlgodalParser_DestroyParserLinenumber(ln);
+            AlgodalParser_DestroyTokenizeResult(tr);
+            AlgodalParser_DestroyAnalyzeResult(ar);
             free(text);
             //TODO: free MyData and allocated values
-            long ret[] = {TokenizeResult.error.flags, AnalyzeResult.error.flags};
+            long ret[] = {tr.error.flags, ar.error.flags};
             return ExitParsing(ret, sizeof(ret)/sizeof(long));
         }
         cwpc_printf("FAILED TO OPEN FILE %s\n", argv[1]);

@@ -96,38 +96,46 @@ inline static char *cwpc_strdup(const char * srcStr)
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifndef SET_ALGODALPARSER_SETTING  
+#define SET_ALGODALPARSER_SETTING
+#define ALGODALPARSER_STDERR stderr  
+#define ALGODALPARSER_STDOUT stdout  
+#else
+#ifndef ALGODALPARSER_STDERR
+#define ALGODALPARSER_STDERR stderr
+#endif 
+#ifndef ALGODALPARSER_STDOUT
+#define ALGODALPARSER_STDOUT stdout
+#endif 
+#endif 
 typedef struct AlgodalParser_TokenizeResult AlgodalParser_TokenizeResult;
-typedef struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult;
+typedef struct AlgodalParser_OtherTokenizeParams AlgodalParser_OtherTokenizeParams;
 typedef struct AlgodalParser_Token AlgodalParser_Token;
+typedef struct AlgodalParser_TokenChildren AlgodalParser_TokenChildren;
+typedef struct AlgodalParser_TokenPair AlgodalParser_TokenPair;
+typedef struct AlgodalParser_TokenPairList AlgodalParser_TokenPairList;
+typedef struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult;
+typedef struct AlgodalParser_OtherAnalyzeParams AlgodalParser_OtherAnalyzeParams;
 typedef struct AlgodalParser_Node AlgodalParser_Node;
 typedef struct AlgodalParser_NodeChildren AlgodalParser_NodeChildren;
-typedef struct AlgodalParser_Linenumber AlgodalParser_Linenumber;
-typedef struct AlgodalParser_Program AlgodalParser_Program;
-typedef struct AlgodalParser_Ast AlgodalParser_Ast;
+typedef struct AlgodalParser_NodePair AlgodalParser_NodePair;
+typedef struct AlgodalParser_NodePairList AlgodalParser_NodePairList;
+typedef struct AlgodalParser_ParserLine AlgodalParser_ParserLine; 
 typedef struct AlgodalParser_Error AlgodalParser_Error;
-struct AlgodalParser_InternalLinenumber {
-    const char * buffer;
-    uint32_t lengthOfBuffer;
-    unsigned int pos;
-    struct {
-        unsigned int row;
-        unsigned int col;
-        uint8_t      bufferUpdates;
-    } metric;
-};
-typedef struct AlgodalParser_InternalLinenumber AlgodalParser_InternalLinenumber;
+typedef struct AlgodalParser_UserDefinedError AlgodalParser_UserDefinedError;
+typedef struct AlgodalParser_Program AlgodalParser_Program;
+typedef struct AlgodalParser_Linenumber AlgodalParser_Linenumber;
+typedef struct AlgodalParser_Ast AlgodalParser_Ast;
 struct AlgodalParser_ParserLine
 {
     uint32_t offset;
 };
 struct AlgodalParser_Linenumber
 {
-    AlgodalParser_InternalLinenumber* linenumber;
+    void* linenumber;
     struct AlgodalParser_ParserLine* lines;
     uint32_t numberOfLines;
 };
-struct AlgodalParser_Linenumber *AlgodalParser_CreateParserLinenumber(const char* nulltermText, const uint32_t length);
-void AlgodalParser_DestroyParserLinenumber(struct AlgodalParser_Linenumber * AlgodalParser_ParserLinenumber);
 struct AlgodalParser_String
 {
     char*    text;
@@ -173,118 +181,127 @@ struct AlgodalParser_Program
     uint16_t                          CountOfObjectpoints;
     int8_t                            successful_allocation_json;
 };
+struct AlgodalParser_UserDefinedError
+{
+    char* msg;
+    uint32_t value;
+    uint32_t extravalue;
+};
 struct AlgodalParser_Error
 {
     uint32_t flags;
     uint32_t index;
     uint32_t index2;
-    char *   userDefinedErrorMessage;
+    uint32_t eval1;
+    uint32_t eval2;
     struct 
     {
-        uint32_t value;
-        uint32_t extravalue;
+        AlgodalParser_UserDefinedError* addr;
+        unsigned int                    size;
     } user;
 };
 struct AlgodalParser_Token
 {
-    uint16_t id;
-    uint32_t index;
-    uint32_t size;
+    uint16_t id;  
+    uint32_t index;  
+    uint32_t size;  
+};
+struct AlgodalParser_TokenChildren
+{
+    AlgodalParser_Token *addr;
+    uint32_t             size;
 };
 struct AlgodalParser_TokenizeResult
 {
-    struct
-    {
-        struct AlgodalParser_Token *addr;
-        uint32_t      size;
-    }   tokens;
-    struct AlgodalParser_Error error;
-    int8_t postProcessed;
+    AlgodalParser_TokenChildren  tokens;  
+    struct AlgodalParser_Error error;  
+    int8_t postProcessed;  
 };
 struct AlgodalParser_OtherTokenizeParams
 {
 };
-struct AlgodalParser_TokenizeResult AlgodalParser_GetTokenizeResult(struct AlgodalParser_Program Program, const char* text, const uint32_t size, struct AlgodalParser_OtherTokenizeParams* oparams);
-void AlgodalParser_PrintTokenizeResult(struct AlgodalParser_Program program, struct AlgodalParser_TokenizeResult TokenizeResult, const char* text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber);
-void AlgodalParser_DestroyTokenizeResult(struct AlgodalParser_TokenizeResult TokenizeResult);
-struct AlgodalParser_Node;
 struct AlgodalParser_NodeChildren
 {
-    struct AlgodalParser_Node* *addr;
+    AlgodalParser_Node* *addr;
     uint32_t      size;
 };
 struct AlgodalParser_Node
 {
-    uint16_t indexOfAction;
-    uint32_t indexOfToken;
-    uint32_t size;
-    uint8_t  terminal;
-    int8_t   invisible;
-    int8_t priority;
-    struct AlgodalParser_NodeChildren children;
-    struct AlgodalParser_Node* sibling;
+    uint16_t indexOfAction;  
+    uint32_t indexOfToken;  
+    uint32_t size;  
+    uint8_t  terminal;  
+    int8_t invisible;  
+    int8_t priority;  
+    struct AlgodalParser_NodeChildren children;  
+    struct AlgodalParser_Node* sibling;  
 };
 struct AlgodalParser_AnalyzeResult
 {
-    struct AlgodalParser_NodeChildren nodes;
-    struct AlgodalParser_Error  error;
+    struct AlgodalParser_NodeChildren nodes;  
+    struct AlgodalParser_Error  error;  
 };
 struct AlgodalParser_OtherAnalyzeParams
 {
     int8_t loopOnce;
 };
-struct AlgodalParser_AnalyzeResult AlgodalParser_GetAnalyzeResult(struct AlgodalParser_Program Program, const char* text, struct AlgodalParser_Token *tokens, const uint32_t size, struct AlgodalParser_OtherAnalyzeParams* oparams);
-void AlgodalParser_PrintAnalyzeResult(struct AlgodalParser_Program program, struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult, struct AlgodalParser_Token tokens[], const char* text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber);
-void AlgodalParser_DestroyAnalyzeResult(struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult);
-struct AlgodalParser_TokenPair;
 struct AlgodalParser_TokenPairList
 {
-    struct AlgodalParser_TokenPair *addr;
-    unsigned int       size;
+    AlgodalParser_TokenPair *addr;
+    unsigned int             size;
 };
 struct AlgodalParser_TokenPair
 {
-    const char *key;
-    const char *value;
-    unsigned int offsetOfText;
-    unsigned int lineNumber;
-    unsigned int columnNumber;
+    const char *key;  
+    const char *value;  
+    unsigned int offsetOfText;  
+    unsigned int lineNumber;  
+    unsigned int columnNumber;  
 };
-struct AlgodalParser_NodePair;
 struct AlgodalParser_NodePairList
 {
-    struct AlgodalParser_NodePair *addr;
-    unsigned int     size;
+    AlgodalParser_NodePair *addr;
+    unsigned int            size;
 };
 struct AlgodalParser_NodePair
 {
-    const char*          key;
-    const char          *value;
-    struct AlgodalParser_NodePairList  children;
-    unsigned int offsetOfText;
-    unsigned int lineNumber;
-    unsigned int columnNumber;
+    const char*          key;  
+    const char          *value;  
+    AlgodalParser_NodePairList  children;  
+    unsigned int offsetOfText;  
+    unsigned int lineNumber;  
+    unsigned int columnNumber;  
 };
-struct AlgodalParser_TokenPairList AlgodalParser_ExportTokenizeResult(struct AlgodalParser_TokenizeResult TokenizeResult, struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber);
-struct AlgodalParser_NodePairList AlgodalParser_ExportAnalyzeResult(struct AlgodalParser_Token *tokens, struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult, struct AlgodalParser_Program Program, const char *text, struct AlgodalParser_Linenumber *AlgodalParser_ParserLinenumber);
-void AlgodalParser_DestroyTokenPairList(struct AlgodalParser_TokenPairList pairList);
-void AlgodalParser_DestroyNodePairList(struct AlgodalParser_NodePairList pairList);
-void AlgodalParser_GetNodeValue(const char* text, const struct AlgodalParser_Token tokens[], struct AlgodalParser_Node *node, unsigned int size, char *r_value);
-char* AlgodalParser_AllocNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node);
-void AlgodalParser_GetNodeKey(struct AlgodalParser_Program program, struct AlgodalParser_Node *node, char *r_key);
-void AlgodalParser_GetTokenValue(const char* text, struct AlgodalParser_Token token, char *r_value);
-void AlgodalParser_GetTokenKey(struct AlgodalParser_Program program, struct AlgodalParser_Token token, unsigned int size, char *r_key);
-long AlgodalParser_GetNodeValueSize(const struct AlgodalParser_Token tokens[], struct AlgodalParser_Node *node);
-const char *AlgodalParser_GetActionString_READONLY(struct AlgodalParser_Program program, unsigned int id);
-const char * AlgodalParser_GetTokenizerString_READONLY(struct AlgodalParser_Program program, unsigned int id);
 struct AlgodalParser_Ast
 {
-    AlgodalParser_Program program;
-    AlgodalParser_Token* tokens;
-    AlgodalParser_NodeChildren roots;
-    AlgodalParser_Linenumber* linenumber;
-    char* text;
+    AlgodalParser_Program program;  
+    AlgodalParser_TokenChildren tokens;  
+    AlgodalParser_NodeChildren nodes;  
+    AlgodalParser_Linenumber* linenumber;  
+    char* text;  
 };
+struct AlgodalParser_Linenumber *AlgodalParser_CreateParserLinenumber(const char* text, const uint32_t length);
+void AlgodalParser_DestroyParserLinenumber(struct AlgodalParser_Linenumber * AlgodalParser_ParserLinenumber);
+struct AlgodalParser_TokenizeResult AlgodalParser_GetTokenizeResult(struct AlgodalParser_Program Program, const char* text, const uint32_t size, struct AlgodalParser_OtherTokenizeParams* oparams);
+void AlgodalParser_DestroyTokenizeResult(struct AlgodalParser_TokenizeResult TokenizeResult);
+struct AlgodalParser_AnalyzeResult AlgodalParser_GetAnalyzeResult(struct AlgodalParser_Program Program, const char* text, struct AlgodalParser_Token *tokens, const uint32_t size, struct AlgodalParser_OtherAnalyzeParams* oparams);
+void AlgodalParser_DestroyAnalyzeResult(struct AlgodalParser_AnalyzeResult AlgodalParser_AnalyzeResult);
+void AlgodalParser_DestroyTokenPairList(struct AlgodalParser_TokenPairList pairList);
+void AlgodalParser_DestroyNodePairList(struct AlgodalParser_NodePairList pairList);
+const char *AlgodalParser_GetActionString_READONLY(struct AlgodalParser_Program program, unsigned int id);
+const char * AlgodalParser_GetTokenizerString_READONLY(struct AlgodalParser_Program program, unsigned int id);
+void AlgodalParser_PrintTokenizeResult(AlgodalParser_Ast ast, AlgodalParser_Error error);
+void AlgodalParser_PrintAnalyzeResult(AlgodalParser_Ast ast, AlgodalParser_Error error);
+struct AlgodalParser_TokenPairList AlgodalParser_ExportTokenizeResult(AlgodalParser_Ast ast);
+struct AlgodalParser_NodePairList AlgodalParser_ExportAnalyzeResult(AlgodalParser_Ast ast);
+void AlgodalParser_DestroyNodePair(struct AlgodalParser_NodePair pair);
+void AlgodalParser_DestroyTokenPair(struct AlgodalParser_TokenPair pair);
+AlgodalParser_NodePair AlgodalParser_ExportNode(AlgodalParser_Ast ast, struct AlgodalParser_Node *node);
+struct AlgodalParser_TokenPair AlgodalParser_ExportToken(AlgodalParser_Ast ast, AlgodalParser_Token token);
+void AlgodalParser_PrintToken(AlgodalParser_Ast ast, AlgodalParser_Token token);
+void AlgodalParser_PrintNode(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, uint16_t indent);
+void AlgodalParser_PrintAnalyzeParserError(AlgodalParser_Ast ast, AlgodalParser_Error error);
+void AlgodalParser_PrintTokenizeParserError(AlgodalParser_Ast ast, struct AlgodalParser_Error error);
 #ifdef __cplusplus
 }
 #endif
@@ -296,6 +313,7 @@ struct AlgodalParser_Ast
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define ALGODALPARSER_INITIALIZEAST(PROGRAM) AlgodalParser_InitializeAst(PROGRAM, tr, ar, ln, text)
 AlgodalParser_Ast AlgodalParser_InitializeAst(
     AlgodalParser_Program program,
     AlgodalParser_TokenizeResult tr,
@@ -373,6 +391,13 @@ int AlgodalParser_IsNodeValueSubstring(
     const char* identifier,
     AlgodalParser_Node* node
 );
+char* AlgodalParser_GetNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, char *r_value);
+char* AlgodalParser_AllocNodeValue(AlgodalParser_Ast ast, struct AlgodalParser_Node *node);
+char* AlgodalParser_GetNodeKey(AlgodalParser_Ast ast, struct AlgodalParser_Node *node, char *r_key);
+char* AlgodalParser_GetTokenValue(AlgodalParser_Ast ast, struct AlgodalParser_Token token, char *r_value);
+char* AlgodalParser_GetTokenKey(AlgodalParser_Ast ast, struct AlgodalParser_Token token, char *r_key);
+long AlgodalParser_GetNodeValueSize(AlgodalParser_Ast ast, struct AlgodalParser_Node *node);
+char* AlgodalParser_GetTokenValueSimplified(AlgodalParser_Ast ast, struct AlgodalParser_Token token, char *r_value);
 #ifdef __cplusplus
 }
 #endif
@@ -395,6 +420,7 @@ int AlgodalParser_SubStrCmp(int icase, const char* str1, const char* str2);
 long long AlgodalParser_StrToInt(const char* str, AlgodalParser_StringToNumber* stn);
 double AlgodalParser_StrToDec(const char* str, AlgodalParser_StringToNumber* stn);
 char* AlgodalParser_UnquoteStr(const char* str, char* buf);
+char* AlgodalParser_SimplifyStr(size_t size, char* r_str);
 #ifdef __cplusplus
 }
 #endif
