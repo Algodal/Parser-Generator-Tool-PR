@@ -1,0 +1,44 @@
+# Sample : Int Parser following Bomdas rules
+
+@define:
+%digits "0123456789"
+
+@token:
+@action integer <[?] @oneof "+-" [+] @oneof %digits>
+@action operator <@oneof "*/-+">
+
+@syntax:
+
+@action plus <operator {"+"}>
+@action minus <operator {"-"}>
+@action mul <operator {"*"}>
+@action div <operator {"/"}>
+
+@action multiply <mul factor>
+@action divide <div factor>
+@action term <factor [*](multiply | divide)>
+@action factor <@first  "(" expr ")" | (plus | minus) integer | integer>
+@action add <plus term>
+@action subtract <minus term>
+@action expr <term [*](add | subtract)>
+@action line <expr [?] "\n">
+
+@config {
+    @tokenizer @first [
+        @discard " ", @discard "\r", @reduce "\n", @discard "\t",
+        "(", ")",
+        operator,
+        integer
+    ],
+    @entrypoint [
+        line
+    ],
+    @objectpoint [
+        line,
+        integer,
+        add,
+        subtract,
+        divide,
+        multiply
+    ]
+}
