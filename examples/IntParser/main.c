@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
                 CalculateExprValue(pd.ast, pd.ast.nodes.addr[i])
             );
         }
+        AlgodalParser_DestroyParsedData(pd);
+        free(text); //only free this after you are done with the parsed data
     }
     else
     {
