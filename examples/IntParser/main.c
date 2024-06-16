@@ -24,11 +24,6 @@ static char *ReadFile(const char *name, unsigned int *sizeOfFile)
 static int NodeToNumber(AlgodalParser_Ast ast, AlgodalParser_Node* node) 
 {
     char buf[1024] = {0}; 
-    ////alternative
-    //int size = node->size;
-    //char* buf = malloc(size + 1);
-    //memset(buf, 0, size + 1);
-    ////free before return
     AlgodalParser_GetNodeValue(ast, node, buf);
     return strtol(buf, 0, 10);
 }
