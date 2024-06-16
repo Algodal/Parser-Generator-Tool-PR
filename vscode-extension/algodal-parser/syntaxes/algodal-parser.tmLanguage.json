@@ -6,6 +6,9 @@
 			"include": "#comments"
 		},
 		{
+			"include": "#variables"
+		},
+		{
 			"include": "#punctuations"
 		},
 		{
@@ -50,7 +53,7 @@
 		"phases": {
 			"patterns": [{
 				"name": "emphasis.algodal-parser",
-				"match": "@\\b([tT][oO][kK][eE][nN]|[sS][yY][nN][tT][aA][xX])\\b"
+				"match": "@\\b([tT][oO][kK][eE][nN]|[sS][yY][nN][tT][aA][xX]|[Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee]|[Dd][Ee][Ff][Ii][Nn][Ee])\\b"
 			}]
 		},
 		"actions": {
@@ -62,13 +65,13 @@
 		"configs": {
 			"patterns": [{
 				"name": "support.type.property-name.css.algodal-parser markup.italic.algodal-parser",
-				"match": "@\\b([cC][oO][nN][fF][iI][gG]|[tT][oO][kK][eE][nN][iI][zZ][eE][rR]|[oO][bB][jJ][eE][cC][tT][pP][oO][iI][nN][tT]|[eE][nN][tT][rR][yY][pP][oO][iI][nN][tT])\\b"
+				"match": "@\\b([cC][oO][nN][fF][iI][gG]|[tT][oO][kK][eE][nN][iI][zZ][eE][rR]|[oO][bB][jJ][eE][cC][tT][pP][oO][iI][nN][tT]|[eE][nN][tT][rR][yY][pP][oO][iI][nN][tT]|[Tt][Oo][Kk][Ee][Nn][Pp][Hh][Aa][Ss][Ee][_][Ii][Nn][Ii][Tt][Ii][Aa][Ll][_][Aa][Cc][Tt][Ii][Oo][Nn][_][Cc][Aa][Ll][Ll]|[Tt][Oo][Kk][Ee][Nn][Pp][Hh][Aa][Ss][Ee][_][Pp][Oo][Pp][_][Tt][Oo][Kk][Ee][Nn][_][Cc][Rr][Ee][Aa][Tt][Ii][Oo][Nn]|[Tt][Oo][Kk][Ee][Nn][Pp][Hh][Aa][Ss][Ee][_][Pp][Oo][Pp][_][Aa][Ll][Ll])\\b"
 			}]
 		},
 		"commands": {
 			"patterns": [{
 				"name": "keyword.algodal-parser",
-				"match": "@\\b([cC][hH][aA][rR]|[oO][nN][eE][oO][fF]|[oO][rR][dD][eE][rR]|[nN][oO][tT]|[fF][iI][rR][sS][tT]|[dD][iI][sS][cC][aA][rR][dD]|[rR][eE][dD][uU][cC][eE]|[pP][rR][eE][vV][iI][oO][uU][sS]|[pP][oO][sS][tT]_[cC][rR][eE][aA][tT][eE]|[aA][nN][dD]|[nN][uU][lL][lL][iI][fF][yY])\\b"
+				"match": "@\\b([cC][hH][aA][rR]|[oO][nN][eE][oO][fF]|[oO][rR][dD][eE][rR]|[nN][oO][tT]|[fF][iI][rR][sS][tT]|[dD][iI][sS][cC][aA][rR][dD]|[rR][eE][dD][uU][cC][eE]|[pP][rR][eE][vV][iI][oO][uU][sS]|[pP][oO][sS][tT]_[cC][rR][eE][aA][tT][eE]|[aA][nN][dD]|[nN][uU][lL][lL][iI][fF][yY]|[Nn][Ee][Ww][Ll][Ii][Nn][Ee]|[Xx][Ss][Pp][Aa][Cc][Ee]|[Nn][Ee]|[Ee][Qq]|[Ll][Ee]|[Gg][Ee]|[Ll][Tt]|[Gg][Tt]|[Pp][Ee][Ee][Kk]|[Pp][Oo][Pp]|[Pp][Uu][Ss][Hh]|[Ee][Ll][Ss][Ee]|[Ee][Nn][Dd]|[Tt][Hh][Ee][Nn]|[Ii][Ff]|[Ll][Ee][Nn][Gg][Tt][Hh]|[Qq][Ww][Oo][Rr][Dd]|[Dd][Ww][Oo][Rr][Dd]|[Ww][Oo][Rr][Dd]|[Bb][Yy][Tt][Ee]|[Ss][Ii][Ll][Ee][Nn][Tt]|[Cc][Aa][Ll][Ll][Aa][Ll][Ii][Aa][Ss]|[Cc][Aa][Ll][Ll])\\b"
 			}]
 		},
 		"strings": {
@@ -91,7 +94,7 @@
 			"patterns": [
 				{
 					"name": "constant.numeric.algodal-parser",
-					"match": "(0[xu][A-Fa-f0-9]+)|\\d+"
+					"match": "(0[xu][A-Fa-f0-9]+)|\\d+|([-][-][Tt][Rr][Uu][Ee])\\b"
 				}
 			]
 		},
@@ -116,6 +119,12 @@
 		"punctuations": {
 			"patterns": [{
 				"match": "[,(){}\\[\\]<>]"
+			}]
+		},
+		"variables": {
+			"patterns": [{
+				"name": "storage.type.java.algodal-parser",
+				"match": "[&%]\\b([A-Za-z0-9_]+)\\b"
 			}]
 		}
 	},

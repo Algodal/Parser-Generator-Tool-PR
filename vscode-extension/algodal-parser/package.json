@@ -2,9 +2,9 @@
   "name": "algodal-parser",
   "displayName": "algodal-parser",
   "description": "Algodal Parser Generator Language",
-  "version": "2.0.2",
+  "version": "4.0.0",
   "engines": {
-    "vscode": "^1.81.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Programming Languages"
@@ -12,7 +12,7 @@
   "contributes": {
     "languages": [{
       "id": "algodal-parser",
-      "aliases": ["Algodal Parser", "Algodal Parser Generator Language", "algodal-parser"],
+      "aliases": ["Algodal Parser Generator Language", "Algodal Parser Language", "algodal-parser"],
       "extensions": [".algodal-parser",".parser"],
       "configuration": "./language-configuration.json"
     }],
