@@ -1,0 +1,6 @@
+@token:
+@action alpha <@oneof %alphabet>
+
+@config {
+	@tokenizer [alpha, "\n" - 10]
+}

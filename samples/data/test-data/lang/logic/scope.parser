@@ -1,0 +1,31 @@
+@token:
+@action A <@oneof "0123456789">
+@action B <@oneof "ABCDEFGHIJ">
+@action C <@oneof "KLMNOPQRST">
+@action D <@oneof "UVW">
+@action E <@oneof "XYZ">
+@action F <@char>
+
+@syntax:
+@action S <@first <T> | U | V>
+@action T <@first A | <B> | C>
+@action U <@first <D | E>>
+@action V <F>
+
+@config {
+	@tokenizer [
+		A, B, C, D, E, F - 10
+	],
+	@objectpoint [
+		A, B, C, D, E, F, 
+		T, U, V, S
+	],
+	@entrypoint [
+		S
+	]
+}
+
+
+
+
+

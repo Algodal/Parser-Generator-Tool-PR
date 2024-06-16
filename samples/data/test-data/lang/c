@@ -1,0 +1,23 @@
+@token:
+@action name < [+] @oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ" >
+@action number < [+] @oneof "0123456789" >
+@action equate < @first "+=" | "-=" | "/=" | "*=" | "=">
+@action operator < @oneof "+-/*">
+@action space <[+]@oneof" \r\n\t">
+
+@syntax:
+@action function <name "(" [?](name [*]("," name)) ")" "{" [*]state "}">
+@action state < name equate (express [*](operator express)) ";">
+@action value < @first name | number>
+@action express < value operator value>
+
+@config {
+	@tokenizer [
+		"{", "}", "(", ")", ",", ";",
+		name, number, equate, operator, @discard space
+	],
+	@objectpoint [
+		function, state, express, value, operator
+	],
+	@entrypoint [ function ]
+}

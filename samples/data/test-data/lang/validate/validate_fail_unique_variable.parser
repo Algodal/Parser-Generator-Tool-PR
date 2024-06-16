@@ -1,0 +1,11 @@
+@variable:
+&variable "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+&variable
+
+
+@token:
+@action alpha <@oneof &variable>
+
+@config {
+	@tokenizer [alpha, "\n" - 10]
+}

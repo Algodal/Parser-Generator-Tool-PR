@@ -1,0 +1,14 @@
+@action name: @token <[+] @oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ">
+@action number: @token <[+] @oneof "0123456789">
+@action space: @token <[+] @oneof " \t">
+@action eol: @token <"\n">
+
+@action stmt: @syntax < name "=" number [0-1]eol>
+@action prog: @syntax < [+]stmt>
+
+@config
+{ 
+	@tokenizer:[name, number, @discard space, @reduce eol, "="], 
+	@entrypoint:[prog], 
+	@objectpoint:[prog, stmt, name, number]
+}

@@ -1,0 +1,24 @@
+@token:
+@action A <@char>
+@action B <[2] @char>
+
+@syntax:
+@action C <A | B>
+
+@config {
+	@tokenizer [
+		A,
+		B
+	],
+	@objectpoint [
+		A, C
+	],
+	@entrypoint [
+		A, C
+	]
+}
+
+
+
+
+

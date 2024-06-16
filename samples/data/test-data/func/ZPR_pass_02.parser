@@ -1,0 +1,29 @@
+@token:
+@action Tb <
+	Ta
+>
+@action Ta <@char>
+
+@syntax:
+@action Sa <Tb>
+@action Sb < Sa {9:'Z'}
+>
+
+@config {
+	@tokenizer [
+		Tb
+	],
+	@objectpoint [
+		Tb,
+		Sa,
+		Sb
+	],
+	@entrypoint [
+		Sb
+	]
+}
+
+
+
+
+

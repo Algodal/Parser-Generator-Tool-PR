@@ -1,0 +1,115 @@
+# XML is complicated to parse.
+# The language specification does not differentiate between tokenization and analyzation.
+# It treat each character like a token (which defeats the purpose of a tokenization phase).
+# However, we have made our unique tweeks to make a parser that takes full use of tokenization phase.
+
+@token:
+@action char_other < #ref: https://www.w3.org/TR/xml/
+	@first
+	"\r\n" | "\n" | "\t" |
+	@char {0x20 : 0xd7ff} |
+	@char {0xe000 : 0xfffd} |
+	@char {0x10000 : 0x10ffff}
+>
+
+# we give important tokens there own action
+
+@action sym_dq <"\"">
+@action sym_sq <"'">
+@action sym_a  <"&">
+@action sym_p  <"%">
+
+@action ang_lt <"<">
+@action ang_rt <">">
+@action ang_lt_c <"</">
+@action ang_rt_c <"/>">
+@action ang_lt_p <"<?xml">
+@action ang_rt_p <"?>">
+
+@action char_space <
+	[+](@first "\r\n" | @oneof " \n\t")
+>
+
+@action char_namestart < #ref: https://www.w3.org/TR/xml/
+	@first
+	":" | @char {'A' : 'Z'} | "_" | @char {'a' : 'z'} | 
+	@char {0xc0 : 0xd6} | @char {0xd8 : 0xf6} | @char {0xf8 : 0x2ff} |
+	@char {0x370 : 0x37d} | @char {0x37f : 0x1fff} | @char {0x200c : 0x200d} |
+	@char {0x2070 : 0x218f} | @char {0x2c00 : 0x2fef} | @char {0x3001 : 0xd7ff} |
+	@char {0xf900 : 0xfdcf} | @char {0xfdf0 : 0xfffd} | @char {0x10000 : 0xeffff}
+>
+
+@action char_name < #ref: https://www.w3.org/TR/xml/
+	char_namestart | "-" | "." | @char {'0' : '9'} |
+	@char {0xb7} | @char {0x0300 : 0x036f} | @char {0x203f : 0x2040}
+>
+
+@action name <
+	char_namestart [*]char_name
+>
+
+@action nmtoken <
+	(@nullify @not char_namestart) [+]char_name
+>
+
+
+
+
+@syntax:
+# Everything token is grouped back under a single Char in the syntax phase for general use
+@action Char <
+	char_other | char_space | name | nmtoken |
+	ang_lt | ang_rt |ang_lt_c | ang_rt_c | ang_lt_p | ang_rt_p |
+	sym_dq  | sym_sq | sym_a | sym_p
+>
+
+@action S < char_space >
+
+@action AttValue_SQ <
+	sym_sq [*](@not sym_sq @and @not ang_lt @and @not sym_p)
+>
+
+@action document <
+	prolog
+>
+
+@action prolog <
+	[?] XMLDecl [*]Misc [?](doctypedecl [*]Misc)
+>
+@action XMLDecl <
+	ang_lt_p VersionInfo [?]EncodingDecl [?]SDDecl [?]S ang_rt_p
+>
+@action VersionInfo <
+	S name {"version"} Eq (sym_dq VersionNum sym_dq | sym_sq VersionNum sym_sq)
+>
+@action VersionNum <
+	nmtoken {"1." % 2}
+>
+
+@config {
+	@tokenizer [
+		# important characters are tokenize
+		char_other -10, #everything else, given a priority lower than the others so that it doesn't clash
+		char_space,
+		name,
+		nmtoken,
+		ang_lt,
+		ang_rt,
+		ang_lt_c,
+		ang_rt_c,
+		ang_lt_p,
+		ang_rt_p,
+		sym_dq,
+		sym_sq,
+		sym_a,
+		sym_p
+	],
+	@entrypoint [
+		doument
+	],
+	@objectpoint [
+		document,
+		prolog
+	]
+}
+

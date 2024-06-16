@@ -1,0 +1,32 @@
+@token:
+@action space <[+] @oneof " \r\n\t">
+@action string <"\"" [0+] chars "\"">
+@action number < 
+	("0" | [?]"-" @oneof "123456789" [?] whole) 
+	[?] ("." whole) 
+	[?] ($"E" [?] sign whole)
+>
+@action chars < @first "\\" @char | @not @oneof "\\\"">
+@action whole < [+] @oneof "0123456789">
+@action sign  < @oneof "-+">
+
+@syntax:
+@action value <@first object | array | string | number | "true" | "false" | "null">
+@action object <"{" [?] memlist "}">
+@action member <string ":" value>
+@action memlist < member [*]("," member)>
+@action array <"[" [?] arrlist "]">
+@action arrlist < value [*] ("," value)>
+
+@config
+{ 
+	@tokenizer [
+		"[", "]", "{", "}", ":", ",",
+		"true", "false", "null",
+		number, string,
+		@discard space
+	],
+
+	@entrypoint  [value],
+	@objectpoint [object, array, string, number, member, "true", "false", "null"]
+}

@@ -1,0 +1,69 @@
+@token:
+@action Tb <
+	Ta
+>
+@action Ta <@char>
+
+@syntax:
+@action Sa <Tb>
+@action Sb <
+	@first
+	Sa {"0"} |
+	Sa {"1"} |
+	Sa {"2"} |
+	Sa {"3"} |
+	Sa {"4"} |
+	Sa {"5"} |
+	Sa {"6"} |
+	Sa {"7"} |
+	Sa {"8"} |
+	Sa {"9"} |
+	Sa {"A"} |
+	Sa {"B"} |
+	Sa {"C"} |
+	Sa {"D"} |
+	Sa {"E"} |
+	Sa {"F"} |
+	Sa {"G"} |
+	Sa {"H"} |
+	Sa {"I"} |
+	Sa {"J"} |
+	Sa {"K"} |
+	Sa {"L"} |
+	Sa {"M"} |
+	Sa {"N"} |
+	Sa {"O"} |
+	Sa {"P"} |
+	Sa {"Q"} |
+	Sa {"R"} |
+	Sa {"S"} |
+	Sa {"T"} |
+	Sa {"U"} |
+	Sa {"V"} |
+	Sa {"W"} |
+	Sa {"X"} |
+	Sa {"Y"} |
+	Sa {"Z"} |
+	Sa {" "} |
+	Sa {"\r\n"} |
+	Sa {"\n"}  
+>
+
+@config {
+	@tokenizer [
+		Tb
+	],
+	@objectpoint [
+		Tb,
+		Sa,
+		Sb
+	],
+	@entrypoint [
+		Sb
+	]
+}
+
+
+
+
+

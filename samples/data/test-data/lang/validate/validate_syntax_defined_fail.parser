@@ -1,0 +1,24 @@
+@token:
+@action Ta <@char>
+
+@syntax:
+@action Sa <Ta>
+
+@config {
+	@tokenizer [
+		Ta
+	],
+	@objectpoint [
+		Ta,
+		Sa
+	],
+	@entrypoint [
+		Sa,
+		Sb
+	]
+}
+
+
+
+
+

@@ -15,6 +15,24 @@ The Algodal™ Parser Generator Tool can generate a parser in the C programming 
 - Create a github issue at https://github.com/Algodal/Parser-Generator-Tool-PR/issues
 - Send an email to info@algodal.com
 
+## 4.0.0 (Current Release)
+
+* Added @newline
+* Added @xspace
+* Added @define
+* Added @variable
+* Added @push, @pop, @peek
+* Added @gt, @lt, @ge, @le, @eq, @ne
+* Added @byte, @word, @dword, @qword
+* Added @tokenphase_initial_action_call
+* Added @tokenphase_pop_token_creation
+* Added @tokenphase_pop_all
+* Added Demo button for quick testing
+* Added more examples
+* Added samples
+* Improved priority for entrypoint
+* Improved error reporting
+* Re-implement JSON program
 
 ## 2.0.0 (Current Release)
 

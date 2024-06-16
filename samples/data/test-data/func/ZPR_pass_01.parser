@@ -1,0 +1,24 @@
+@token:
+@action Ta <Tb {9 : 'Z'}>
+@action Tb <@char>
+
+@syntax:
+@action Sa <Ta>
+
+@config {
+	@tokenizer [
+		Ta
+	],
+	@objectpoint [
+		Ta,
+		Sa
+	],
+	@entrypoint [
+		Sa
+	]
+}
+
+
+
+
+

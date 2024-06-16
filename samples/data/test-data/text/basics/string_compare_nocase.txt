@@ -1,0 +1,4 @@
+red = 5
+BLUE = 6
+Val = 100
+total = 20

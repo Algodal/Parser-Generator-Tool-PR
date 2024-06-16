@@ -1,0 +1,18 @@
+@token:
+@action name_start <@oneof "ABCDEFGHIJKLMNOPQRSTUVWXYZ">
+@action name_continue <@oneof "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_">
+@action name <name_start [*]name_continue>
+@action text <@nullify @not name_start [*]name_continue>
+@action other<"?" [*]@char>
+
+
+@config{
+	@tokenizer [
+		name,
+		text,
+		@discard " ",
+		@discard "\r\n",
+		@discard "\n",
+		other -10
+	]
+}

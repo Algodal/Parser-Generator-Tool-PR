@@ -1,0 +1,51 @@
+# https://en.wikipedia.org/wiki/INI_file
+# Only basic features implemented.  It would be very easy to implement advanced features.
+
+@token:
+@action alpha    <[+] @oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ">
+@action numeral <[+] @oneof $"0123456789">
+@action a_other  < @first numeral | [+] "_" | alpha>
+@action name     <[*] "_" alpha [*] a_other>
+
+@action newline <@first "\r\n" | "\n">
+@action space   <[+] @oneof " \t">
+
+@action comment  <"#" [*] @not "\n" newline >
+
+@action indent @post_create
+@action dedent @post_create
+
+@syntax:
+@action if_cmd <name {"if"}>
+@action def_cmd <name {"def"}>
+@action pass <name {"pass"}>
+
+@action prog <def_cmd name "(" name ")" ":" newline if_cmd name ":" newline pass>
+
+
+@config
+{
+	@tokenizer [
+		@reduce newline, 
+		name, 
+		space, 
+		@discard comment, 
+		":", 
+		"(", ")",
+		numeral, 
+		indent, 
+		dedent
+		],
+	@entrypoint [prog],
+	@objectpoint [
+		prog, 
+		space, 
+		name, 
+		if_cmd, 
+		pass, 
+		numeral, 
+		def_cmd, 
+		indent, 
+		dedent
+		]
+}
