@@ -1,0 +1,7 @@
+@token:
+@action A < [*] @oneof "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n" >
+
+@config
+{
+    @tokenizer [ A ]
+}

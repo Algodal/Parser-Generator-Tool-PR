@@ -1,0 +1,22 @@
+@token:
+@action A <@not "L" @and @not "G">
+@action L <"L">
+@action G <"G">
+
+@syntax:
+@action Z <@not G @and @not L>
+@action O < G | L>
+
+@config {
+	@tokenizer [
+		A,
+		L,
+		G
+	],
+	@objectpoint [
+		A, L, G, Z, O
+	],
+	@entrypoint [
+		Z, O
+	]
+}

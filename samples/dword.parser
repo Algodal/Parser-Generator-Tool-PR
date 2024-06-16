@@ -1,0 +1,15 @@
+@variable:
+&number
+
+@token:
+@action number <([4] @byte) => &number>
+@action text <number [@dword(&number)] @char>
+
+@syntax:
+@action alpha <text>
+
+@config{
+	@tokenizer[text, @discard "\n" -10],
+	@objectpoint[alpha],
+	@entrypoint[alpha]
+}

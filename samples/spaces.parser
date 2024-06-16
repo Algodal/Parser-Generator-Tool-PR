@@ -1,0 +1,11 @@
+@token:
+@action spaces < @xspace >
+@action newline <@newline>
+
+@config
+{
+    @tokenizer [
+        spaces,
+        newline
+    ]
+}

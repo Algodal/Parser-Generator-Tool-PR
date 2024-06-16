@@ -1,0 +1,11 @@
+@token:
+@action A < @not @char { '😀' : '😹' }>
+@action unknown < @char >
+
+
+@config
+{ 
+	@tokenizer [
+		A,
+		unknown -10
+	]}

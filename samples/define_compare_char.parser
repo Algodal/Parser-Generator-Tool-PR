@@ -1,0 +1,20 @@
+@define:
+%AA 'A'
+%DD 'D'
+%CC 'F'
+
+@token:
+@action alpha < @oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ" >
+@action A <@char {%AA : %DD}>
+@action B <@char {%CC}>
+@action newline <@oneof "\r\n">
+
+@config
+{
+    @tokenizer [
+		A 10,
+		B 10,
+        alpha,
+		newline
+    ]
+}

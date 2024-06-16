@@ -1,0 +1,9 @@
+@token:
+@action newline < @newline >
+
+@config
+{
+    @tokenizer [
+        newline
+    ]
+}

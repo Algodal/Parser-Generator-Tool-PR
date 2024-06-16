@@ -1,0 +1,11 @@
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action word <@if (char) @then ([1] char) @end>
+
+@config{
+	@tokenizer[char, @discard "\n" -10],
+	@objectpoint[word],
+	@entrypoint[word]
+}

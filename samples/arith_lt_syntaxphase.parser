@@ -1,0 +1,16 @@
+@variable:
+&var "05"
+&var2 "07"
+
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action paragraph <char  @lt {&var, &var2} ${@lt {"A", "Z"}}>
+
+@config{
+	@tokenizer [char, @discard "\n" -10],
+	@entrypoint[paragraph],
+	@objectpoint[paragraph]
+}
+

@@ -1,0 +1,6 @@
+@token:
+@action byte <@byte>
+
+@config{
+	@tokenizer[byte]
+}

@@ -1,0 +1,8 @@
+@token:
+@action A < @char >
+@action B < @char >
+
+@config
+{
+    @tokenizer [ A, @discard B ]
+}

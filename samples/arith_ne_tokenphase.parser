@@ -1,0 +1,11 @@
+@variable:
+&var "10"
+&var2 "05"
+
+@token:
+@action char <@not "\n"  @ne {&var, &var2} ${@ne {"A", "Z"}}>
+
+@config{
+	@tokenizer [char, @discard "\n" -10]
+}
+

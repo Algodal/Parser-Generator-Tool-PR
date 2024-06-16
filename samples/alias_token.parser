@@ -1,0 +1,13 @@
+@token:
+@action alpha <@oneof "ABCDE">
+@action other <@char>
+@action letter @alias alpha
+
+@syntax:
+@action character <letter | alpha | other>
+
+@config {
+	@tokenizer [letter 10, alpha, other -10, "\n" -20],
+	@objectpoint[letter, alpha, other],
+	@entrypoint[character]
+}

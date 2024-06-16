@@ -1,0 +1,19 @@
+@variable:
+&alphabet "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+&iter 26
+&action1 "char"
+&action2 "pre"
+
+@token:
+@action char <@oneof &alphabet>
+
+@syntax:
+@action word <[&iter] @call &action2>
+@action pre <@call &action1> @silent
+
+@config
+{
+	@tokenizer[char, @discard "\n" - 10],
+	@objectpoint[word],
+	@entrypoint[word]
+}

@@ -1,0 +1,15 @@
+@variable:
+&var "5"
+&var2 "Hello World"
+
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action paragraph <char @number(&var) =>&var @length(&var2) => &var2>
+
+@config{
+	@tokenizer [char, @discard "\n" -10],
+	@entrypoint[paragraph],
+	@objectpoint[paragraph]
+}

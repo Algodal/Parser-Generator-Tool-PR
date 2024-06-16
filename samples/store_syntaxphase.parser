@@ -1,0 +1,14 @@
+@variable:
+&var
+
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action word <(char) => &var>
+
+@config{
+	@tokenizer[char, @discard "\n" -10],
+	@entrypoint[word],
+	@objectpoint[word, char]
+}

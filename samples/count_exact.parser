@@ -1,0 +1,82 @@
+@token:
+@action A_01 < [1] "A" >
+@action A_02 < [1] "B" >
+@action A_03 < [1] "C" >
+@action A_04 < [1] "D" >
+@action A_05 < [1] "E" >
+@action A_06 < [1] "F" >
+@action A_07 < [1] "G" >
+@action A_08 < [1] "H" >
+@action A_09 < [1] "I" >
+@action A_10 < [1] "J" >
+@action A_11 < [1] "K" >
+@action A_12 < [1] "L" >
+@action A_13 < [1] "M" >
+@action A_14 < [1] "N" >
+@action A_15 < [1] "O" >
+@action A_16 < [1] "P" >
+@action A_17 < [1] "Q" >
+@action A_18 < [1] "R" >
+@action A_19 < [1] "S" >
+@action A_20 < [1] "T" >
+@action A_21 < [1] "U" >
+@action A_22 < [1] "V" >
+@action A_23 < [1] "W" >
+@action A_24 < [1] "X" >
+@action A_25 < [1] "Y" >
+@action A_26 < [1] "Z" >
+@action A_27 < [1] "0" >
+@action A_28 < [1] "1" >
+@action A_29 < [1] "2" >
+@action A_30 < [1] "3" >
+@action A_31 < [1] "4" >
+@action A_32 < [1] "5" >
+@action A_33 < [1] "6" >
+@action A_34 < [1] "7" >
+@action A_35 < [1] "8" >
+@action A_36 < [1] "9" >
+@action A_37 < [1] "\n" >
+
+
+@config
+{
+    @tokenizer [ 
+        A_01,
+        A_02,
+        A_03,
+        A_04,
+        A_05,
+        A_06,
+        A_07,
+        A_08,
+        A_09,
+        A_10,
+        A_11,
+        A_12,
+        A_13,
+        A_14,
+        A_15,
+        A_16,
+        A_17,
+        A_18,
+        A_19,
+        A_20,
+        A_21,
+        A_22,
+        A_23,
+        A_24,
+        A_25,
+        A_26,
+        A_27,
+        A_28,
+        A_29,
+        A_30,
+        A_31,
+        A_32,
+        A_33,
+        A_34,
+        A_35,
+        A_36,
+        A_37
+    ]
+}

@@ -1,0 +1,9 @@
+@token:
+@action initial <@push {0}>
+@action char <@not "\n">
+
+@config{
+	@tokenizer @first [char, @discard "\n" -10],
+	@tokenphase_initial_action_call { .action : initial }
+}
+

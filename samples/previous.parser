@@ -1,0 +1,10 @@
+@token:
+@action A < "A" >
+@action B < @previous A "B">
+
+@config
+{
+    @tokenizer [ A
+    , B 
+    ]
+}

@@ -1,0 +1,26 @@
+@token:
+@action A < @char { '😀' : '😹' }>
+@action unknown < @char >
+
+@syntax:
+@action Apple <  A | unknown >
+@action Apple2 < Apple >
+
+
+@config
+{ 
+	@tokenizer [
+		A,
+		unknown -10
+	],
+	@objectpoint [
+		Apple,
+		Apple2,
+		A, 
+		Unknown
+	],
+	@entrypoint [
+		Apple +10,
+		Apple2
+	]
+}

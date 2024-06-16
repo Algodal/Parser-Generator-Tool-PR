@@ -1,0 +1,16 @@
+@variable:
+&var "10"
+&var2 "05"
+
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action paragraph <char  @ne {&var, &var2} ${@ne {"A", "Z"}}>
+
+@config{
+	@tokenizer [char, @discard "\n" -10],
+	@entrypoint[paragraph],
+	@objectpoint[paragraph]
+}
+

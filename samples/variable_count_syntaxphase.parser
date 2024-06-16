@@ -1,0 +1,16 @@
+@variable:
+&var
+
+@token:
+@action char <@not "\n">
+@action num <[+]@oneof"0123456789">
+
+@syntax:
+@action word <@first (num) => &var | [&var] char>
+
+@config{
+	@tokenizer @first [num, char, @discard "\n" -10],
+	@entrypoint[word],
+	@objectpoint[word, char, num]
+}
+

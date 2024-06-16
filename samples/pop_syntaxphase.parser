@@ -1,0 +1,16 @@
+@variable:
+&var "Hello World"
+&var2
+
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action word <(char) => &var2 @push {&var2} @pop {&var}>
+
+@config{
+	@tokenizer @first [char, @discard "\n" -10],
+	@entrypoint[word],
+	@objectpoint[word, char]
+}
+

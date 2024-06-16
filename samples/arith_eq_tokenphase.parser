@@ -1,0 +1,11 @@
+@variable:
+&var "10"
+&var2 "10"
+
+@token:
+@action char <@not "\n"  @eq {&var, &var2} ${@eq {"A", "a"}}>
+
+@config{
+	@tokenizer @first [char, @discard "\n" -10]
+}
+

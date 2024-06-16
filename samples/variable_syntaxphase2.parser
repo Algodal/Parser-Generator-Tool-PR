@@ -1,0 +1,64 @@
+@variable:
+&space  " \r\n\t"
+&ec "\""
+&z "0"
+&d0 "-"
+&counting "123456789"
+&dot "."
+&E $"E"
+&bs "\\"
+&eq "\\\""
+&whole "0123456789"
+&sign "-+"
+&true "true"
+&false "false"
+&null "null"
+&oc "{"
+&cc "}"
+&colon ":"
+&comma ","
+&os "["
+&cs "]"
+
+@token:
+@action space <[+] @oneof &space>
+@action string <&ec [0+] chars &ec>
+@action number < 
+	(&z | [?]&d0 @oneof &counting [?] whole) 
+	[?] (&dot whole) 
+	[?] (&E [?] sign whole)
+>
+@action chars < @first &bs @char | @not @oneof &eq>
+@action whole < [+] @oneof &whole>
+@action sign  < @oneof &sign>
+
+@action os <&os>
+@action cs <&cs>
+@action oc <&oc>
+@action cc <&cc>
+@action colon <&colon>
+@action comma <&comma>
+@action true <&true>
+@action false <&false>
+@action null <&null>
+
+@syntax:
+@action value <@first object | array | string | number | true | false | null>
+@action object <oc [?] memlist cc>
+@action member <string colon value>
+@action memlist < member [*](comma member)>
+@action array <os [?] arrlist cs>
+@action arrlist < value [*] (comma value)>
+
+@config
+{ 
+	@tokenizer [
+		os, cs, oc, cc, colon, comma,
+		true, false, null,
+		number, string,
+		@discard space
+	],
+
+	@entrypoint  [value],
+	@objectpoint [object, array, string, number, member, true, false, null]
+}

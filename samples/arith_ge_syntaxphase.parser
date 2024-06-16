@@ -1,0 +1,16 @@
+@variable:
+&var "10"
+&var2 "10"
+
+@token:
+@action char <@not "\n">
+
+@syntax:
+@action paragraph <char  @ge {&var, &var2} ${@ge {"B", "a"}}>
+
+@config{
+	@tokenizer [char, @discard "\n" -10],
+	@entrypoint[paragraph],
+	@objectpoint[paragraph]
+}
+

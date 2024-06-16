@@ -1,0 +1,9 @@
+@token:
+@action A < "1" >
+@action B < @char >
+@action C < @char @char >
+
+@config
+{
+    @tokenizer @first [ A, B, C ]
+}

@@ -1,0 +1,7 @@
+@token:
+@action A < [38] @oneof "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n" >
+
+@config
+{
+    @tokenizer [ A ]
+}

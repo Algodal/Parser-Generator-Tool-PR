@@ -1,0 +1,7 @@
+@token:
+@action A < [+] @char >
+
+@config
+{
+    @tokenizer [ A ]
+}

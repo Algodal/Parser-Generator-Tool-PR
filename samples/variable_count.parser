@@ -1,0 +1,10 @@
+@variable:
+&iter 26
+&alphabet "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+@token:
+@action alpha <[&iter] @oneof &alphabet>
+
+@config {
+	@tokenizer [alpha, "\n" - 10]
+}

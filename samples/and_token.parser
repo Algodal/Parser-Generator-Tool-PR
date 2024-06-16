@@ -1,0 +1,8 @@
+@token:
+@action A <@not "a" @and @not "b">
+
+@config {
+	@tokenizer [
+		A
+	]
+}

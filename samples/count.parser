@@ -1,0 +1,11 @@
+@token:
+@action A < @oneof "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" >
+
+@action F < [1] [1] [1] [1] A >
+
+@config
+{
+    @tokenizer [ @discard "\n",
+    F
+     ]
+}

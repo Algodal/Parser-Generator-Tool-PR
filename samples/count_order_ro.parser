@@ -1,0 +1,82 @@
+@token:
+@action A_01 < [*] @order "A" >
+@action A_02 < [*] @order "B" >
+@action A_03 < [*] @order "C" >
+@action A_04 < [*] @order "D" >
+@action A_05 < [*] @order "E" >
+@action A_06 < [*] @order "F" >
+@action A_07 < [*] @order "G" >
+@action A_08 < [*] @order "H" >
+@action A_09 < [*] @order "I" >
+@action A_10 < [*] @order "J" >
+@action A_11 < [*] @order "K" >
+@action A_12 < [*] @order "L" >
+@action A_13 < [*] @order "M" >
+@action A_14 < [*] @order "N" >
+@action A_15 < [*] @order "O" >
+@action A_16 < [*] @order "P" >
+@action A_17 < [*] @order "Q" >
+@action A_18 < [*] @order "R" >
+@action A_19 < [*] @order "S" >
+@action A_20 < [*] @order "T" >
+@action A_21 < [*] @order "U" >
+@action A_22 < [*] @order "V" >
+@action A_23 < [*] @order "W" >
+@action A_24 < [*] @order "X" >
+@action A_25 < [*] @order "Y" >
+@action A_26 < [*] @order "Z" >
+@action A_27 < [*] @order "0" >
+@action A_28 < [*] @order "1" >
+@action A_29 < [*] @order "2" >
+@action A_30 < [*] @order "3" >
+@action A_31 < [*] @order "4" >
+@action A_32 < [*] @order "5" >
+@action A_33 < [*] @order "6" >
+@action A_34 < [*] @order "7" >
+@action A_35 < [*] @order "8" >
+@action A_36 < [*] @order "9" >
+@action A_37 < [*] @order "\n" >
+
+
+@config
+{
+    @tokenizer [ 
+        A_01,
+        A_02,
+        A_03,
+        A_04,
+        A_05,
+        A_06,
+        A_07,
+        A_08,
+        A_09,
+        A_10,
+        A_11,
+        A_12,
+        A_13,
+        A_14,
+        A_15,
+        A_16,
+        A_17,
+        A_18,
+        A_19,
+        A_20,
+        A_21,
+        A_22,
+        A_23,
+        A_24,
+        A_25,
+        A_26,
+        A_27,
+        A_28,
+        A_29,
+        A_30,
+        A_31,
+        A_32,
+        A_33,
+        A_34,
+        A_35,
+        A_36,
+        A_37
+    ]
+}

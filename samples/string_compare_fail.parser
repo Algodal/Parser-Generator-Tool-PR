@@ -1,0 +1,30 @@
+@token:
+@action id < [+]@oneof $"ABCDEFGHIJKLMNOPQRSTUVWXYZ" >
+@action num <[+]@oneof "0123456789">
+@action spc <[+]@oneof "\r\n\t ">
+
+
+@syntax:
+@action red <id {"GREEN"} "=" num>
+@action blue <id {"PURPLE"} "=" num>
+@action hundred <id "=" num {"100"}>
+@action other <id "=" num {"50"}>
+@action exp <@first red | blue | hundred | other>
+
+@config
+{
+    @tokenizer [
+        id, num, @discard spc, "="
+    ],
+    @entrypoint [exp],
+    @objectpoint [
+        exp, 
+        id, 
+        num, 
+        "=",
+        red,
+        blue,
+        hundred,
+        other
+    ]
+}

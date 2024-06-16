@@ -1,0 +1,11 @@
+@token:
+@action initial <@push {0}@push {1}@push {2}@push {3}@push {4}>
+@action char <@not "\n">
+@action token_labeled_for_each_pop @post_create
+
+@config{
+	@tokenizer @first [char, @discard "\n" -10, token_labeled_for_each_pop],
+	@tokenphase_initial_action_call { .action : initial },
+	@tokenphase_pop_token_creation {.label: token_labeled_for_each_pop, .stop: 2}
+}
+

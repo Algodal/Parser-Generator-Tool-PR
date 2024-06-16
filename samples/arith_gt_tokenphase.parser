@@ -1,0 +1,11 @@
+@variable:
+&var "A"
+&var2 "9"
+
+@token:
+@action char <@not "\n"  @gt {&var, &var2} ${@gt {"Z", "a"}}>
+
+@config{
+	@tokenizer @first [char, @discard "\n" -10]
+}
+

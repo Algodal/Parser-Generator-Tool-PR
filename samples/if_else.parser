@@ -1,0 +1,27 @@
+@token:
+@action char <
+	@if ("+") @then 
+		([+] @char) 
+	@else
+	@if ("-") @then 
+		([+] @char)
+	@else
+	@if ("$") @then 
+		([+] @char)
+	@else
+	@if ("@") @then 
+		([+] @char)
+	@else
+	@if ("&") @then 
+		([+] @char)
+	@else
+	@if ("*") @then 
+		([+] @char)
+	@else
+		([+] @char)
+	@end
+>
+
+@config{
+	@tokenizer[char, @discard "\n" -10]
+}

@@ -1,0 +1,20 @@
+@variable:
+&text "Z"
+&action "beta"
+
+@token:
+#@action action_name <([+] @include  @not " ") => &action>
+@action alpha <(@oneof "ABCDE") => &text >
+@action beta < "FGHIJKLMNOP" > @silent
+@action var   < @call &action >
+@action other <@char>
+
+@syntax:
+@action character <alpha | var | other>
+
+@config {
+	@tokenizer [alpha, var 1, other -10, "\n" -20],
+	@objectpoint[alpha, var, other],
+	@entrypoint[character]
+}
+

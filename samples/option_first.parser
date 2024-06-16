@@ -1,0 +1,16 @@
+@token:
+@action A < @oneof "01234567" >
+@action B < @oneof "89ABCDEF" >
+@action C < @oneof "GHIJKLMN" >
+@action D < @oneof "OPQRSTUV" >
+@action E < @oneof "WXYZ" >
+
+@action F < @first A | B | C | D | E >
+
+@config
+{
+    @tokenizer [ 
+        @discard "\n",
+        F
+    ]
+}

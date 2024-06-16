@@ -1,0 +1,10 @@
+@variable:
+&var
+
+@token:
+@action char <(@char) => &var @push {&var} @push {123} @push {"Hello Stack"}>
+
+
+@config{
+	@tokenizer[char, @discard "\n" -10]
+}

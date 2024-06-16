@@ -1,0 +1,11 @@
+@variable:
+&var "5"
+&var2 "Hello World"
+
+@token:
+@action char <@not "\n" @number(&var) =>&var @length(&var2) => &var2>
+
+@config{
+	@tokenizer @first [char, @discard "\n" -10]
+}
+
